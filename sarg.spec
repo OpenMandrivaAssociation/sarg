@@ -1,18 +1,18 @@
 %define contentdir /var/www
-%define their_version 1.4.1
+%define name sarg
+%define version 2.2.3.1
+%define release %mkrel 1
 
 Summary: Squid report generator per user/ip/name
-Name: sarg
-Version: 1.4.1
-Release: 4mdk
+Name: %{name}
+Version: %{version}
+Release: %{release}
 URL: http://sarg.sourceforge.net/
-Source: http://web.onda.com.br/orso/sarg-%{their_version}.tar.bz2
+Source: http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.bz2
 Source1: 0sarg.daily
 Source2: 0sarg.weekly
 Source3: 0sarg.monthly
-Source4: sarg.conf.rpm
-Patch0: sarg-1.4.1-2.6.fix.patch
-Patch1: sarg-1.4.1-index.sort.patch
+Source4: sarg.conf.mandriva
 License: GPL
 Group: Monitoring
 BuildRoot: %{_tmppath}/%{name}-%{version}-root
@@ -23,58 +23,50 @@ Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
 The reports will be generated in HTML or email.
 
 %prep
-%setup -n %{name}-%{their_version}
-
-%patch0 -p1 
-%patch1 -p1 -b .sort
+%setup -q
 
 %build
 chmod a+x cfgaux languages include
-%configure --enable-bindir=%{_sbindir} --enable-sysconfdir=%{_sysconfdir}/%{name} --enable--mandir=%{buildroot}%{_mandir}
+%configure --enable-bindir=%{_sbindir} --enable-sysconfdir=%{_datadir}/%{name} --enable--mandir=%{buildroot}%{_mandir}
 
 
 mkdir -p %{buildroot}/%{_mandir}/man1
-perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' $RPM_BUILD_DIR/%name-%their_version/Makefile
+perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' $RPM_BUILD_DIR/%name-%version/Makefile
 make
 
 %install
-mkdir -p $RPM_BUILD_ROOT/{usr/sbin,etc/sarg,var}
+mkdir -p $RPM_BUILD_ROOT/{%_sbindir,%_datadir/%name,%_sysconfdir/%name}
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid/{daily,weekly,monthly}
-make BINDIR=$RPM_BUILD_ROOT%{_sbindir} SYSCONFDIR=$RPM_BUILD_ROOT%{_sysconfdir}/sarg MANDIR=$RPM_BUILD_ROOT%{_mandir}/man1 install
+make BINDIR=$RPM_BUILD_ROOT%{_sbindir} SYSCONFDIR=$RPM_BUILD_ROOT%{_datadir}/%{name} MANDIR=$RPM_BUILD_ROOT%{_mandir}/man1 install
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
 install -m 0755 %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.daily/0%{name}
 mkdir -p $RPM_BUILD_ROOT/etc/cron.weekly
 install -m 0755 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.weekly/0%{name}
 mkdir -p $RPM_BUILD_ROOT/etc/cron.monthly
 install -m 0755 %{SOURCE3} $RPM_BUILD_ROOT/etc/cron.monthly/0%{name}
-cp sarg.conf $RPM_BUILD_ROOT%{_sysconfdir}/sarg/sarg.conf.default
-cp $RPM_BUILD_ROOT%{_sysconfdir}/sarg/sarg.conf.default $RPM_BUILD_ROOT/%{_sysconfdir}/sarg/sarg.conf
-
-# real access.log file location
-perl -p -i -e "s|#access_log /usr/local/squid/logs/access.log|access_log /var/log/squid/access.log|" $RPM_BUILD_ROOT/%{_sysconfdir}/sarg/sarg.conf
-perl -p -i -e "s|#output_dir /home/httpd/html/squid-reports # RedHat version|output_dir /var/www/html/squid-reports # Mandrake version|" $RPM_BUILD_ROOT/%{_sysconfdir}/sarg/sarg.conf
+install -m 644 %{SOURCE4} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/%{name}.conf
+ln -sf %_sysconfdir/%{name}/%{name}.conf $RPM_BUILD_ROOT/%{_datadir}/%{name}/%{name}.conf
+mv $RPM_BUILD_ROOT/%{_datadir}/%{name}/exclude_codes $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/exclude_codes
 
 strip -s $RPM_BUILD_ROOT/%{_sbindir}/%{name}
+
+%find_lang %name
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+%files -f %name.lang
 %defattr(-,root,squid)
 %doc CONTRIBUTORS DONATIONS ChangeLog
 %{_mandir}/man1/*
 %attr(0755,root,squid) %{_sbindir}/%{name}*
-%attr(0664,root,squid) %config(noreplace) %{_sysconfdir}/sarg/sarg.conf
+%attr(0755,root,squid) %dir %{_sysconfdir}/%{name}
+%attr(0664,root,squid) %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %attr(0755,root,squid) %dir %{contentdir}/html/squid
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/daily
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/weekly
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/monthly
-%config(noreplace) %attr(0755,root,squid) %dir %{_sysconfdir}/sarg
-%config(noreplace) %attr(0755,root,squid) %dir %{_sysconfdir}/sarg/languages
+%{_datadir}/%{name}
 %config(noreplace) %attr(0754,root,squid) %{_sysconfdir}/cron.*/*
-%config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/sarg/sarg.conf.default
-%config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/sarg/exclude_codes
-%config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/sarg/languages/.new
-%config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/sarg/languages/*
-
+%config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/%{name}/exclude_codes
