@@ -1,7 +1,7 @@
 %define contentdir /var/www
 %define name sarg
 %define version 2.2.3.1
-%define release %mkrel 1
+%define release %mkrel 2
 
 Summary: Squid report generator per user/ip/name
 Name: %{name}
@@ -35,6 +35,7 @@ perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' $RPM_BUIL
 make
 
 %install
+rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/{%_sbindir,%_datadir/%name,%_sysconfdir/%name}
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid/{daily,weekly,monthly}
