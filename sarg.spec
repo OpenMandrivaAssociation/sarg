@@ -1,33 +1,40 @@
 %define contentdir /var/www
-%define name sarg
-%define version 2.2.3.1
-%define release %mkrel 2
 
-Summary: Squid report generator per user/ip/name
-Name: %{name}
-Version: %{version}
-Release: %{release}
-URL: http://sarg.sourceforge.net/
-Source: http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.bz2
-Source1: 0sarg.daily
-Source2: 0sarg.weekly
-Source3: 0sarg.monthly
-Source4: sarg.conf.mandriva
-License: GPL
-Group: Monitoring
-BuildRoot: %{_tmppath}/%{name}-%{version}-root
-Requires: squid, bash
+Summary:	Squid report generator per user/ip/name
+Name:		sarg
+Version:	2.2.3.1
+Release:	%mkrel 3
+License:	GPL
+Group:		Monitoring
+URL:		http://sarg.sourceforge.net/
+Source:		http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.bz2
+Source1:	0sarg.daily
+Source2:	0sarg.weekly
+Source3:	0sarg.monthly
+Source4:	sarg.conf.mandriva
+Patch0:		sarg-2.2.3.1-automatic-vars-segfault.patch
+Patch1:		sarg-2.2.3.1-lots-of-compiler-warnings.patch
+Patch2:		sarg-2.2.3.1-rewind.patch
+Requires:	squid, bash
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
 Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
 The reports will be generated in HTML or email.
 
 %prep
+
 %setup -q
+%patch0 -p0
+%patch1 -p1
+%patch2 -p1
 
 %build
 chmod a+x cfgaux languages include
-%configure --enable-bindir=%{_sbindir} --enable-sysconfdir=%{_datadir}/%{name} --enable--mandir=%{buildroot}%{_mandir}
+%configure2_5x \
+    --enable-bindir=%{_sbindir} \
+    --enable-sysconfdir=%{_datadir}/%{name} \
+    --enable--mandir=%{buildroot}%{_mandir}
 
 
 mkdir -p %{buildroot}/%{_mandir}/man1
@@ -36,6 +43,7 @@ make
 
 %install
 rm -rf $RPM_BUILD_ROOT
+
 mkdir -p $RPM_BUILD_ROOT/{%_sbindir,%_datadir/%name,%_sysconfdir/%name}
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid/{daily,weekly,monthly}
