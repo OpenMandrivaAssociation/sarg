@@ -16,7 +16,6 @@ Patch0:		sarg-2.2.3.1-automatic-vars-segfault.patch
 Patch1:		sarg-2.2.3.1-lots-of-compiler-warnings.patch
 Patch2:		sarg-2.2.3.1-rewind.patch
 Requires:	squid, bash
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 %description
 Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
