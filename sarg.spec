@@ -3,8 +3,8 @@
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
 Version:	2.2.3.1
-Release:	%mkrel 4
-License:	GPL
+Release:	%mkrel 5
+License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
 Source:		http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.bz2
@@ -57,8 +57,6 @@ install -m 0755 %{SOURCE3} $RPM_BUILD_ROOT/etc/cron.monthly/0%{name}
 install -m 644 %{SOURCE4} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/%{name}.conf
 ln -sf %_sysconfdir/%{name}/%{name}.conf $RPM_BUILD_ROOT/%{_datadir}/%{name}/%{name}.conf
 mv $RPM_BUILD_ROOT/%{_datadir}/%{name}/exclude_codes $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/exclude_codes
-
-strip -s $RPM_BUILD_ROOT/%{_sbindir}/%{name}
 
 %find_lang %name
 
