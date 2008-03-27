@@ -2,19 +2,22 @@
 
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
-Version:	2.2.3.1
-Release:	%mkrel 5
+Version:	2.2.5
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
-Source:		http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.bz2
+Source:		http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.gz
 Source1:	0sarg.daily
 Source2:	0sarg.weekly
 Source3:	0sarg.monthly
 Source4:	sarg.conf.mandriva
-Patch0:		sarg-2.2.3.1-automatic-vars-segfault.patch
 Patch1:		sarg-2.2.3.1-lots-of-compiler-warnings.patch
 Patch2:		sarg-2.2.3.1-rewind.patch
+Patch3:		sarg-2.2.5-avx-fix_segfault.patch
+Patch4:		sarg-2.2.5-avx-make-getword-better.patch
+Patch5:		sarg-2.2.5-avx-make_useragent_prettier.patch
+Patch6:		sarg-2.2.5-avx-too_small_font_buffer.patch
 Requires:	squid, bash
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
@@ -25,9 +28,12 @@ The reports will be generated in HTML or email.
 %prep
 
 %setup -q
-%patch0 -p0
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
 
 %build
 chmod a+x cfgaux languages include
