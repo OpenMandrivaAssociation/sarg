@@ -3,7 +3,7 @@
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
 Version:	2.2.5
-Release:	%mkrel 3
+Release:	%mkrel 4
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
