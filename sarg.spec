@@ -3,7 +3,7 @@
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
 Version:	2.2.5
-Release:	%mkrel 5
+Release:	%mkrel 6
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
@@ -18,8 +18,10 @@ Patch3:		sarg-2.2.5-avx-fix_segfault.patch
 Patch4:		sarg-2.2.5-avx-make-getword-better.patch
 Patch5:		sarg-2.2.5-avx-make_useragent_prettier.patch
 Patch6:		sarg-2.2.5-avx-too_small_font_buffer.patch
+Patch7:		sarg-2.2.5-enlarge_report_buffers.patch
+Patch8:		sarg-2.2.5-limit_sprintf.patch
 Requires:	squid, bash
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root
+BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
@@ -34,6 +36,8 @@ The reports will be generated in HTML or email.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p1
+%patch7 -p1
+%patch8 -p0
 
 %build
 chmod a+x cfgaux languages include
