@@ -2,8 +2,8 @@
 
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
-Version:	2.2.5
-Release:	%mkrel 7
+Version:	2.2.7.1
+Release:	%mkrel 1
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
@@ -20,7 +20,8 @@ Patch5:		sarg-2.2.5-avx-make_useragent_prettier.patch
 Patch6:		sarg-2.2.5-avx-too_small_font_buffer.patch
 Patch7:		sarg-2.2.5-enlarge_report_buffers.patch
 Patch8:		sarg-2.2.5-limit_sprintf.patch
-Requires:	squid, bash
+Requires:	squid
+Requires:	bash
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
@@ -30,14 +31,14 @@ The reports will be generated in HTML or email.
 %prep
 
 %setup -q
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
-%patch7 -p1
-%patch8 -p0
+#%patch1 -p1
+#%patch2 -p1
+#%patch3 -p1
+#%patch4 -p1
+#%patch5 -p1
+#%patch6 -p1
+#%patch7 -p1
+#%patch8 -p0
 
 %build
 chmod a+x cfgaux languages include
@@ -57,7 +58,7 @@ rm -rf $RPM_BUILD_ROOT
 mkdir -p $RPM_BUILD_ROOT/{%_sbindir,%_datadir/%name,%_sysconfdir/%name}
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid
 mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid/{daily,weekly,monthly}
-make BINDIR=$RPM_BUILD_ROOT%{_sbindir} SYSCONFDIR=$RPM_BUILD_ROOT%{_datadir}/%{name} MANDIR=$RPM_BUILD_ROOT%{_mandir}/man1 install
+%makeinstall BINDIR=$RPM_BUILD_ROOT%{_sbindir} SYSCONFDIR=$RPM_BUILD_ROOT%{_datadir}/%{name} MANDIR=$RPM_BUILD_ROOT%{_mandir}/man1 
 mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
 install -m 0755 %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.daily/0%{name}
 mkdir -p $RPM_BUILD_ROOT/etc/cron.weekly
