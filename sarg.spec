@@ -3,7 +3,7 @@
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
 Version:	2.2.7.1
-Release:	%mkrel 1
+Release:	%mkrel 2
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
@@ -44,7 +44,8 @@ The reports will be generated in HTML or email.
 chmod a+x cfgaux languages include
 %configure2_5x \
     --enable-bindir=%{_sbindir} \
-    --enable-sysconfdir=%{_datadir}/%{name} \
+    --enable-sysconfdir=%{_sysconfdir}/%{name} \
+    --sysconfdir=%{_sysconfdir}/%{name} \
     --enable--mandir=%{buildroot}%{_mandir}
 
 
