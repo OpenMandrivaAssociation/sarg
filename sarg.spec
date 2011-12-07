@@ -2,8 +2,8 @@
 
 Summary:	Squid report generator per user/ip/name
 Name:		sarg
-Version:	2.3.1
-Release:	%mkrel 2
+Version:	2.3.2
+Release:	1
 License:	GPLv2+
 Group:		Monitoring
 URL:		http://sarg.sourceforge.net/
@@ -22,7 +22,6 @@ Patch7:		sarg-2.2.5-enlarge_report_buffers.patch
 Patch8:		sarg-2.2.5-limit_sprintf.patch
 Requires:	squid
 Requires:	bash
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-buildroot
 
 %description
 Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
@@ -41,51 +40,49 @@ The reports will be generated in HTML or email.
 #%patch8 -p0
 
 %build
-chmod a+x cfgaux languages include
-%configure2_5x \
-    --enable-bindir=%{_sbindir} \
-    --enable-sysconfdir=%{_sysconfdir}/%{name} \
-    --sysconfdir=%{_sysconfdir}/%{name} \
-    --enable--mandir=%{buildroot}%{_mandir}
+chmod a+x cfgaux configure include
+%configure2_5x
 
 
 mkdir -p %{buildroot}/%{_mandir}/man1
-perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' $RPM_BUILD_DIR/%name-%version/Makefile
+perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' %{buildroot}/%name-%version/Makefile
 make
 
 %install
-rm -rf $RPM_BUILD_ROOT
 
-mkdir -p $RPM_BUILD_ROOT/{%_sbindir,%_datadir/%name,%_sysconfdir/%name}
-mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid
-mkdir -p $RPM_BUILD_ROOT%{contentdir}/html/squid/{daily,weekly,monthly}
-%makeinstall BINDIR=$RPM_BUILD_ROOT%{_sbindir} SYSCONFDIR=$RPM_BUILD_ROOT%{_datadir}/%{name} MANDIR=$RPM_BUILD_ROOT%{_mandir}/man1 
-mkdir -p $RPM_BUILD_ROOT/etc/cron.daily
-install -m 0755 %{SOURCE1} $RPM_BUILD_ROOT/etc/cron.daily/0%{name}
-mkdir -p $RPM_BUILD_ROOT/etc/cron.weekly
-install -m 0755 %{SOURCE2} $RPM_BUILD_ROOT/etc/cron.weekly/0%{name}
-mkdir -p $RPM_BUILD_ROOT/etc/cron.monthly
-install -m 0755 %{SOURCE3} $RPM_BUILD_ROOT/etc/cron.monthly/0%{name}
-install -m 644 %{SOURCE4} $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/%{name}.conf
-ln -sf %_sysconfdir/%{name}/%{name}.conf $RPM_BUILD_ROOT/%{_datadir}/%{name}/%{name}.conf
-mv $RPM_BUILD_ROOT/%{_datadir}/%{name}/exclude_codes $RPM_BUILD_ROOT/%{_sysconfdir}/%{name}/exclude_codes
+mkdir -p %{buildroot}/{%_bindir,%_datadir/%name,%_sysconfdir/%name}
+mkdir -p %{buildroot}%{contentdir}/html/squid
+mkdir -p %{buildroot}%{contentdir}/html/squid/{daily,weekly,monthly}
+%makeinstall_std
+mkdir -p %{buildroot}/etc/cron.daily
+install -m 0755 %{SOURCE1} %{buildroot}/etc/cron.daily/0%{name}
+mkdir -p %{buildroot}/etc/cron.weekly
+install -m 0755 %{SOURCE2} %{buildroot}/etc/cron.weekly/0%{name}
+mkdir -p %{buildroot}/etc/cron.monthly
+install -m 0755 %{SOURCE3} %{buildroot}/etc/cron.monthly/0%{name}
+install -m 644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.conf
+mv %{buildroot}/%{_sysconfdir}/exclude_codes %{buildroot}/%{_sysconfdir}/%{name}/exclude_codes
+mv %{buildroot}/%{_sysconfdir}/%{name}.conf %{buildroot}/%{_sysconfdir}/%{name}/%{name}.conf
+mv %{buildroot}/%{_sysconfdir}/user_limit_block %{buildroot}/%{_sysconfdir}/%{name}/user_limit_block
+mv %{buildroot}/%{_sysconfdir}/css.tpl %{buildroot}/%{_sysconfdir}/%{name}/css.tpl
 
 %find_lang %name
-
-%clean
-rm -rf $RPM_BUILD_ROOT
 
 %files -f %name.lang
 %defattr(-,root,squid)
 %doc CONTRIBUTORS DONATIONS ChangeLog
 %{_mandir}/man1/*
-%attr(0755,root,squid) %{_sbindir}/%{name}*
+%{_sysconfdir}/%{name}/*.tpl
+%{_sysconfdir}/%{name}/user*
+%attr(0755,root,squid) %{_bindir}/%{name}*
 %attr(0755,root,squid) %dir %{_sysconfdir}/%{name}
 %attr(0664,root,squid) %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %attr(0755,root,squid) %dir %{contentdir}/html/squid
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/daily
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/weekly
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/monthly
+%attr(0755,root,squid) %dir %{contentdir}/html/%{name}-php
 %{_datadir}/%{name}
+%{contentdir}/html/%{name}-php/
 %config(noreplace) %attr(0754,root,squid) %{_sysconfdir}/cron.*/*
 %config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/%{name}/exclude_codes
