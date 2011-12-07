@@ -41,6 +41,7 @@ The reports will be generated in HTML or email.
 
 %build
 chmod a+x cfgaux configure include
+chmod 744 images
 %configure2_5x
 
 
