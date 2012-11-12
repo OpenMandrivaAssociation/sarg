@@ -1,0 +1,34 @@
+diff -pruN sarg-2.2.5.avx-with-patches/log.c sarg-2.2.5/log.c
+--- sarg-2.2.5.avx-with-patches/log.c	2008-03-11 14:10:16.505880032 -0600
++++ sarg-2.2.5/log.c	2008-03-12 12:37:46.311871789 -0600
+@@ -101,7 +101,7 @@ int main(argc,argv)
+    char ip[MAXLEN];
+    char msg[MAXLEN];
+    char tam[255];
+-   char fun[255];
++   char fun[MAXLEN];
+    char wuser[MAXLEN]; 
+    char smartfilter[MAXLEN];
+    char dia[128]; 
+diff -pruN sarg-2.2.5.avx-with-patches/util.c sarg-2.2.5/util.c
+--- sarg-2.2.5.avx-with-patches/util.c	2008-03-11 14:10:16.495879881 -0600
++++ sarg-2.2.5/util.c	2008-03-12 12:51:56.175685794 -0600
+@@ -58,7 +58,7 @@ void css(FILE *fp_css);
+ void getword(char *word, char *line, int stop)
+ {
+   int x = 0, y = 0;
+-  int limit=10000;
++  int limit=strlen(line) + 1;
+   //char wline[MAXLEN];
+ 
+   //strcpy(wline,line);
+@@ -68,7 +68,8 @@ void getword(char *word, char *line, int
+      return;
+   }
+ 
+-  for(x=0; line[x] && (line[x] != stop ) && x<limit; x++) word[x] = line[x];
++  for(x=0; x<limit && line[x] && (line[x] != stop ); x++)
++    word[x] = line[x];
+   if(x == limit) {
+     printf("SARG: getword loop detected.\n");
+     //printf("SARG: Record=\"%s\"\n",wline);

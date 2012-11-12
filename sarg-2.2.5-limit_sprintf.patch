@@ -1,0 +1,11 @@
+--- useragent.c	2009-03-11 18:00:35.000000000 +0100
++++ useragent.c.oden	2009-03-11 18:08:18.000000000 +0100
+@@ -107,7 +107,7 @@ void useragent()
+    strcpy(fdate,data);
+ 
+    if(debug) {
+-      sprintf(msg, "   %s: %ld",text[10],totregsl);
++      snprintf(msg, sizeof(buf), "   %s: %ld",text[10],totregsl);
+       debuga(msg);
+    }
+ 

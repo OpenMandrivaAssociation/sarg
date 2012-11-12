@@ -1,0 +1,2475 @@
+diff -pruN sarg-2.2.5.orig/auth.c sarg-2.2.5/auth.c
+--- sarg-2.2.5.orig/auth.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/auth.c	2008-03-13 12:50:57.842398705 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void htaccess(char *name)
+ {
+@@ -40,7 +40,7 @@ void htaccess(char *name)
+    }
+ 
+    strcpy(warea,Require);
+-   getword(buf,warea,'%');
++   getword(buf,warea,'%',sizeof(buf));
+    fputs("AuthUserFile ",fp_auth);
+    fputs(AuthUserFile,fp_auth);
+    fputs("\n",fp_auth);
+diff -pruN sarg-2.2.5.orig/authfail.c sarg-2.2.5/authfail.c
+--- sarg-2.2.5.orig/authfail.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/authfail.c	2008-03-13 12:51:24.182796044 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+ char *subs(char *str, char *from, char *to);
+@@ -120,11 +120,11 @@ void authfail_report()
+    fputs(url,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
+-      getword(hora,buf,' ');
+-      getword(user,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
++      getword(data,buf,' ',sizeof(data));
++      getword(hora,buf,' ',sizeof(hora));
++      getword(user,buf,' ',sizeof(user));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
+ 
+       if((str=(char *) strstr(user, "_")) != (char *) NULL ) {
+          if((str=(char *) strstr(str+1, "_")) != (char *) NULL )
+diff -pruN sarg-2.2.5.orig/convlog.c sarg-2.2.5/convlog.c
+--- sarg-2.2.5.orig/convlog.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/convlog.c	2008-03-13 13:03:02.103324016 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void convlog(char *arq, char *df, int dfrom, int duntil)
+ {
+@@ -48,7 +48,7 @@ void convlog(char *arq, char *df, int df
+    }
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
++      getword(data,buf,' ',sizeof(data));
+       tt=atoi(data);
+       t=localtime(&tt);
+ 
+diff -pruN sarg-2.2.5.orig/dansguardian_log.c sarg-2.2.5/dansguardian_log.c
+--- sarg-2.2.5.orig/dansguardian_log.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/dansguardian_log.c	2008-03-13 13:06:56.559556600 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void conv_month(char *month);
+ void debuga(char *msg);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void dansguardian_log()
+ {
+@@ -99,16 +99,16 @@ void dansguardian_log()
+       if(strncmp(buf,"#",1) == 0)
+          continue;
+       if(strstr(buf,"loglocation ") != 0) {
+-         getword(loglocation,buf,'\'');
+-         getword(loglocation,buf,'\'');
++         getword(loglocation,buf,'\'',sizeof(loglocation));
++         getword(loglocation,buf,'\'',sizeof(loglocation));
+          break;
+       }
+    }
+ 
+    if(debug) {
+       strcpy(buf,text[7]);
+-      getword(urly,buf,' ');
+-      getword(href,buf,' ');
++      getword(urly,buf,' ',sizeof(urly));
++      getword(href,buf,' ',sizeof(href));
+       sprintf(msg,"%s DansGuardian %s: %s",urly,buf,loglocation);
+       debuga(msg);
+    }
+@@ -121,18 +121,18 @@ void dansguardian_log()
+    while(fgets(buf,sizeof(buf),fp_in) != NULL) {
+       if(strstr(buf," *DENIED* ") == 0)
+          continue;
+-      getword(year,buf,'.');
+-      getword(mon,buf,'.');
+-      getword(day,buf,' ');
+-      getword(hour,buf,' ');
+-      getword(user,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,'/');
+-      getword(url,buf,'/');
+-      getword(url,buf,' ');
+-      getword(code1,buf,' ');
+-      getword(code1,buf,' ');
+-      getword(code2,buf,' ');
++      getword(year,buf,'.',sizeof(year));
++      getword(mon,buf,'.',sizeof(mon));
++      getword(day,buf,' ',sizeof(day));
++      getword(hour,buf,' ',sizeof(hour));
++      getword(user,buf,' ',sizeof(user));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,'/',sizeof(url));
++      getword(url,buf,'/',sizeof(url));
++      getword(url,buf,' ',sizeof(url));
++      getword(code1,buf,' ',sizeof(code1));
++      getword(code1,buf,' ',sizeof(code1));
++      getword(code2,buf,' ',sizeof(code2));
+       sprintf(wdata,"%s%02d%s",year,atoi(mon),day);
+       idata = atoi(wdata);
+ 
+diff -pruN sarg-2.2.5.orig/dansguardian_report.c sarg-2.2.5/dansguardian_report.c
+--- sarg-2.2.5.orig/dansguardian_report.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/dansguardian_report.c	2008-03-13 13:08:21.998106065 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+ char *subs(char *str, char *from, char *to);
+@@ -111,12 +111,12 @@ void dansguardian_report()
+    fputs(url,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(user,buf,' ');
+-      getword(date2,buf,' ');
+-      getword(hour,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
+-      getword(rule,buf,'\n');
++      getword(user,buf,' ',sizeof(user));
++      getword(date2,buf,' ',sizeof(date2));
++      getword(hour,buf,' ',sizeof(hour));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
++      getword(rule,buf,'\n',sizeof(rule));
+ 
+       if(strcmp(UserIp,"yes") == 0)
+            strcpy(user,ip);
+diff -pruN sarg-2.2.5.orig/datafile.c sarg-2.2.5/datafile.c
+--- sarg-2.2.5.orig/datafile.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/datafile.c	2008-03-13 13:04:47.864919406 -0600
+@@ -27,7 +27,7 @@
+ 
+ void saverecs(char *dirname, char *user, long long int nacc, char *url, long long int nbytes, char *ip, char *hora, char *dia, long long int nelap, long long int incache, long long int oucache);
+ void grava_SmartFilter(char *dirname, char *user, char *ip, char *data, char *hora, char *url, char *smart);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void ip2name(char *ip);
+ void gravatmp(char *oldaccuser, char *dirname, char *oldurl, long long int nacc, long long int nbytes, char *oldmsg, long long int nelap, int indexonly, long long int incache, long long int oucache);
+ void debuga(char *msg);
+@@ -76,21 +76,21 @@ void data_file(char *tmp)
+          exit(1);
+       }
+       strcpy(wdname,direntp->d_name);
+-      getword(wname2,wdname,'.');
++      getword(wname2,wdname,'.',sizeof(wname2));
+       strcat(user,wname2);
+ 
+       ttopen=0;
+       while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-         getword(accdia,buf,' ');
+-         getword(acchora,buf,' ');
+-         getword(accuser,buf,' ');
+-         getword(accip,buf,' ');
+-         getword(accurl,buf,' ');
+-         getword(accbytes,buf,' ');
+-         getword(acccode,buf,' ');
+-         getword(accelap,buf,' ');
+-         getword(accsmart,buf,' ');
+-         getword(accsmart,buf,'"');
++         getword(accdia,buf,' ',sizeof(accdia));
++         getword(acchora,buf,' ',sizeof(acchora));
++         getword(accuser,buf,' ',sizeof(accuser));
++         getword(accip,buf,' ',sizeof(accip));
++         getword(accurl,buf,' ',sizeof(accurl));
++         getword(accbytes,buf,' ',sizeof(accbytes));
++         getword(acccode,buf,' ',sizeof(acccode));
++         getword(accelap,buf,' ',sizeof(accelap));
++         getword(accsmart,buf,' ',sizeof(accsmart));
++         getword(accsmart,buf,'"',sizeof(accsmart));
+    
+          if(strcmp(Ip2Name,"yes") == 0) {
+             if(strcmp(accip,ipantes) != 0) {
+@@ -132,7 +132,7 @@ void data_file(char *tmp)
+          nelap+=my_atoll(accelap);
+    
+          strcpy(wcrc,acccode);
+-         getword(crc2,wcrc,'/');
++         getword(crc2,wcrc,'/',sizeof(crc2));
+ 
+          if(strstr(crc2,"MISS") != 0) oucache+=my_atoll(accbytes);
+          else incache+=my_atoll(accbytes);
+diff -pruN sarg-2.2.5.orig/denied.c sarg-2.2.5/denied.c
+--- sarg-2.2.5.orig/denied.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/denied.c	2008-03-13 13:00:18.530856563 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+ char *subs(char *str, char *from, char *to);
+@@ -110,11 +110,11 @@ void gen_denied_report()
+    fputs(url,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
+-      getword(hora,buf,' ');
+-      getword(user,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
++      getword(data,buf,' ',sizeof(data));
++      getword(hora,buf,' ',sizeof(hora));
++      getword(user,buf,' ',sizeof(user));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
+ 
+       if((str=(char *) strstr(user, "_")) != (char *) NULL ) {
+          if((str=(char *) strstr(str+1, "_")) != (char *) NULL )
+diff -pruN sarg-2.2.5.orig/download.c sarg-2.2.5/download.c
+--- sarg-2.2.5.orig/download.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/download.c	2008-03-13 13:00:43.471232783 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+ char *subs(char *str, char *from, char *to);
+@@ -117,11 +117,11 @@ void download_report()
+    fputs(url,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
+-      getword(hora,buf,' ');
+-      getword(user,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
++      getword(data,buf,' ',sizeof(data));
++      getword(hora,buf,' ',sizeof(hora));
++      getword(user,buf,' ',sizeof(user));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
+   
+       if((str=(char *) strstr(user, "_")) != (char *) NULL ) {
+          if((str=(char *) strstr(str+1, "_")) != (char *) NULL )
+diff -pruN sarg-2.2.5.orig/exclude.c sarg-2.2.5/exclude.c
+--- sarg-2.2.5.orig/exclude.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/exclude.c	2008-03-13 13:03:38.073866624 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ int vhexclude(char *excludefile, char *url)
+ {
+@@ -47,10 +47,10 @@ int vhexclude(char *excludefile, char *u
+    strcpy(str,excludefile);
+    strcpy(wurl,url);
+ 
+-   getword(whost,str,' ');
++   getword(whost,str,' ',sizeof(whost));
+    
+    if(strchr(wurl,':') != 0) {
+-      getword(warea,wurl,':');
++      getword(warea,wurl,':',sizeof(warea));
+       strcpy(wurl,warea);
+    }
+ 
+@@ -61,15 +61,15 @@ int vhexclude(char *excludefile, char *u
+          return(0);
+       }
+       if(strchr(whost,'*') != 0) {
+-         getword(warea,whost,'.');
+-         getword(warea,wurl,'.');
++         getword(warea,whost,'.',sizeof(warea));
++         getword(warea,wurl,'.',sizeof(warea));
+          if(strcmp(wurl,whost) == 0) {
+ 	    free(wurl);
+ 	    free(str);
+             return(0);
+ 	 }
+       }
+-      getword(whost,str,' ');
++      getword(whost,str,' ',sizeof(whost));
+    }
+    free(wurl);
+    free(str);
+diff -pruN sarg-2.2.5.orig/getconf.c sarg-2.2.5/getconf.c
+--- sarg-2.2.5.orig/getconf.c	2008-03-13 11:48:50.038252564 -0600
++++ sarg-2.2.5/getconf.c	2008-03-13 13:16:08.899547157 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixnone(char *str);
+ void ccharset();
+ void debuga(char *msg);
+@@ -39,7 +39,7 @@ void parmtest(char *buf)
+ {
+ 
+       if(strstr(buf,"background_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(BgColor,buf);
+          fixnone(BgColor);
+          return;
+@@ -47,7 +47,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"text_color") != 0) {
+          if(strstr(buf,"logo_text_color") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(TxColor,buf);
+             fixnone(TxColor);
+             return;
+@@ -55,21 +55,21 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"text_bgcolor") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TxBgColor,buf);
+          fixnone(TxBgColor);
+          return;
+       }
+ 
+       if(strstr(buf,"title_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TiColor,buf);
+          fixnone(TiColor);
+          return;
+       }
+ 
+       if(strstr(buf,"logo_image") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(LogoImage,buf);
+          fixnone(LogoImage);
+          return;
+@@ -77,57 +77,57 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"logo_text") != 0) {
+          if(strstr(buf,"logo_text_color") == 0) {
+-            getword(wbuf,buf,'"');
+-            getword(LogoText,buf,'"');
++            getword(wbuf,buf,'"',sizeof(wbuf));
++            getword(LogoText,buf,'"',sizeof(LogoText));
+             fixnone(LogoText);
+             return;
+          }
+       }
+ 
+       if(strstr(buf,"logo_text_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(LogoTextColor,buf);
+          fixnone(LogoTextColor);
+          return;
+       }
+ 
+       if(strstr(buf,"background_image") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(BgImage,buf);
+          fixnone(BgImage);
+          return;
+       }
+ 
+       if(strstr(buf,"show_sarg_info") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ShowSargInfo,buf);
+          fixnone(ShowSargInfo);
+          return;
+       }
+ 
+       if(strstr(buf,"show_sarg_logo") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ShowSargLogo,buf);
+          fixnone(ShowSargLogo);
+          return;
+       }
+ 
+       if(strstr(buf,"font_face") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(FontFace,buf);
+          fixnone(FontFace);
+          return;
+       }
+ 
+       if(strstr(buf,"header_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(HeaderColor,buf);
+          fixnone(HeaderColor);
+          return;
+       }
+ 
+       if(strstr(buf,"header_bgcolor") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(HeaderBgColor,buf);
+          fixnone(HeaderBgColor);
+          return;
+@@ -135,7 +135,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"font_size") != 0) {
+          if(strstr(buf,"header_font_size") == 0 && strstr(buf,"title_font_size") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(FontSize,buf);
+             fixnone(FontSize);
+             return;
+@@ -143,22 +143,22 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"header_font_size") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(HeaderFontSize,buf);
+          fixnone(HeaderFontSize);
+          return;
+       }
+ 
+       if(strstr(buf,"title_font_size") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TitleFontSize,buf);
+          fixnone(TitleFontSize);
+          return;
+       }
+ 
+       if(strstr(buf,"image_size") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(Width,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(Width,buf,' ',sizeof(Width));
+          strcpy(Height,buf);
+          fixnone(Width);
+          fixnone(Height);
+@@ -166,35 +166,35 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"title") != 0) {
+-         getword(wbuf,buf,'"');
+-         getword(Title,buf,'"');
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(Title,buf,'"',sizeof(Title));
+          fixnone(Title);
+          return;
+       }
+ 
+       if(strstr(buf,"resolve_ip") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(Ip2Name,buf);
+          fixnone(Ip2Name);
+          return;
+       }
+ 
+       if(strstr(buf,"user_ip") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UserIp,buf);
+          fixnone(UserIp);
+          return;
+       }
+ 
+       if(strstr(buf,"max_elapsed") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(MaxElapsed,buf);
+          fixnone(MaxElapsed);
+          return;
+       }
+ 
+       if(strstr(buf,"date_format") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strncpy(DateFormat,buf,1);
+          fixnone(DateFormat);
+          return;
+@@ -215,16 +215,16 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"topuser_sort_field") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(TopuserSortField,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(TopuserSortField,buf,' ',sizeof(TopuserSortField));
+          strcpy(TopuserSortOrder,buf);
+          fixnone(TopuserSortOrder);
+          return;
+       }
+ 
+       if(strstr(buf,"user_sort_field") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(UserSortField,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(UserSortField,buf,' ',sizeof(UserSortField));
+          strcpy(UserSortOrder,buf);
+          fixnone(UserSortOrder);
+          return;
+@@ -232,7 +232,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"access_log") != 0) {
+ 	 if(strstr(buf,"realtime_access_log_lines") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(AccessLog,buf);
+             fixnone(AccessLog);
+             return;
+@@ -240,49 +240,49 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"useragent_log") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UserAgentLog,buf);
+          fixnone(UserAgentLog);
+          return;
+       }
+ 
+       if(strstr(buf,"exclude_hosts") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ExcludeHosts,buf);
+          fixnone(ExcludeHosts);
+          return;
+       }
+ 
+       if(strstr(buf,"exclude_codes") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ExcludeCodes,buf);
+          fixnone(ExcludeCodes);
+          return;
+       }
+ 
+       if(strstr(buf,"exclude_users") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ExcludeUsers,buf);
+          fixnone(ExcludeUsers);
+          return;
+       }
+ 
+       if(strstr(buf,"password") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(PasswdFile,buf);
+          fixnone(PasswdFile);
+          return;
+       }
+ 
+       if(strstr(buf,"temporary_dir") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TempDir,buf);
+          fixnone(TempDir);
+          return;
+       }
+ 
+       if(strstr(buf,"report_type") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ReportType,buf);
+          fixnone(ReportType);
+          return;
+@@ -290,7 +290,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"output_dir") != 0) {
+          if(strstr(buf,"output_dir_form") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(OutputDir,buf);
+             fixnone(OutputDir);
+             return;
+@@ -298,15 +298,15 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"output_email") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(OutputEmail,buf);
+          fixnone(OutputEmail);
+          return;
+       }
+ 
+       if(strstr(buf,"per_user_limit") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(PerUserLimitFile,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(PerUserLimitFile,buf,' ',sizeof(PerUserLimitFile));
+          strcpy(PerUserLimit,buf);
+          fixnone(PerUserLimitFile);
+          fixnone(PerUserLimit);
+@@ -315,28 +315,28 @@ void parmtest(char *buf)
+ 
+ 
+       if(strstr(buf,"lastlog") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(LastLog,buf);
+          fixnone(LastLog);
+          return;
+       }
+ 
+       if(strstr(buf,"remove_temp_files") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(RemoveTempFiles,buf);
+          fixnone(RemoveTempFiles);
+          return;
+       }
+ 
+       if(strstr(buf,"replace_index") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ReplaceIndex,buf);
+          fixnone(ReplaceIndex);
+          return;
+       }      
+ 
+       if(strstr(buf,"index_tree") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(IndexTree,buf);
+          fixnone(IndexTree);
+          return;
+@@ -344,7 +344,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"index") != 0) {
+          if(strstr(buf,"index_sort_order") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(Index,buf);
+             fixnone(Index);
+             return;
+@@ -352,64 +352,64 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"overwrite_report") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(OverwriteReport,buf);
+          fixnone(OverwriteReport);
+          return;
+       }
+ 
+       if(strstr(buf,"records_without_userid") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(RecordsWithoutUser,buf);
+          fixnone(RecordsWithoutUser);
+          return;
+       }
+ 
+       if(strstr(buf,"use_comma") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UseComma,buf);
+          fixnone(UseComma);
+          return;
+       }
+ 
+       if(strstr(buf,"mail_utility") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(MailUtility,buf);
+          fixnone(MailUtility);
+          return;
+       }
+ 
+       if(strstr(buf,"topsites_num") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TopSitesNum,buf);
+          fixnone(TopSitesNum);
+          return;
+       }
+ 
+       if(strstr(buf,"topuser_num") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TopUsersNum,buf);
+          fixnone(TopUsersNum);
+          return;
+       }
+ 
+       if(strstr(buf,"usertab") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UserTabFile,buf);
+          fixnone(UserTabFile);
+          return;
+       }
+ 
+       if(strstr(buf,"index_sort_order") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(IndexSortOrder,buf);
+          fixnone(IndexSortOrder);
+          return;
+       }
+ 
+       if(strstr(buf,"topsites_sort_order") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(TopsitesSortField,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(TopsitesSortField,buf,' ',sizeof(TopsitesSortField));
+          strcpy(TopsitesSortType,buf);
+          fixnone(TopsitesSortField);
+          fixnone(TopsitesSortType);
+@@ -417,42 +417,42 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"long_url") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(LongUrl,buf);
+          fixnone(LongUrl);
+          return;
+       }
+ 
+       if(strstr(buf,"language") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(language,buf);
+          fixnone(language);
+          return;
+       }
+ 
+       if(strstr(buf,"dansguardian_conf") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DansGuardianConf,buf);
+          fixnone(DansGuardianConf);
+          return;
+       }
+ 
+       if(strstr(buf,"squidguard_conf") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(SquidGuardConf,buf);
+          fixnone(SquidGuardConf);
+          return;
+       }
+ 
+       if(strstr(buf,"date_time_by") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(datetimeby,buf);
+          fixnone(datetimeby);
+          return;
+       }
+ 
+       if(strstr(buf,"charset") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(CharSet,buf);
+          fixnone(CharSet);
+          ccharset(CharSet);
+@@ -460,23 +460,23 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"user_invalid_char") != 0) {
+-         getword(wbuf,buf,'"');
+-         getword(UserInvalidChar,buf,'"');
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(UserInvalidChar,buf,'"',sizeof(UserInvalidChar));
+          fixnone(UserInvalidChar);
+          return;
+       }
+ 
+       if(strstr(buf,"include_users") != 0) {
+-         getword(wbuf,buf,'"');
+-         getword(wbuf,buf,'"');
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(wbuf,buf,'"',sizeof(wbuf));
+ 	 sprintf(IncludeUsers,":%s:",wbuf);
+          fixnone(IncludeUsers);
+          return;
+       }
+ 
+       if(strstr(buf,"exclude_string") != 0) {
+-         getword(wbuf,buf,'"');
+-         getword(ExcludeString,buf,'"');
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(ExcludeString,buf,'"',sizeof(ExcludeString));
+          fixnone(ExcludeString);
+          return;
+       }
+@@ -484,7 +484,7 @@ void parmtest(char *buf)
+       if(strstr(buf,"privacy") != 0) {
+          if(strstr(buf,"privacy_string") == 0 && \
+ 	    strstr(buf,"privacy_string_color") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(Privacy,buf);
+             fixnone(Privacy);
+             return;
+@@ -493,86 +493,86 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"privacy_string") != 0) {
+ 	 if(strstr(buf,"privacy_string_color") == 0) {
+-            getword(wbuf,buf,'"');
+-            getword(PrivacyString,buf,'"');
++            getword(wbuf,buf,'"',sizeof(wbuf));
++            getword(PrivacyString,buf,'"',sizeof(PrivacyString));
+             fixnone(PrivacyString);
+             return;
+ 	 }
+       }
+ 
+       if(strstr(buf,"privacy_string_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(PrivacyStringColor,buf);
+          fixnone(PrivacyStringColor);
+          return;
+       }
+ 
+       if(strstr(buf,"show_successful_message") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(SuccessfulMsg,buf);
+          fixnone(SuccessfulMsg);
+          return;
+       }
+ 
+       if(strstr(buf,"show_read_statistics") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ShowReadStatistics,buf);
+          fixnone(ShowReadStatistics);
+          return;
+       }
+ 
+       if(strstr(buf,"topuser_fields") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(TopUserFields,buf);
+          fixnone(TopUserFields);
+          return;
+       }
+ 
+       if(strstr(buf,"bytes_in_sites_users_report") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(BytesInSitesUsersReport,buf);
+          fixnone(BytesInSitesUsersReport);
+          return;
+       }
+ 
+       if(strstr(buf,"user_report_fields") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UserReportFields,buf);
+          fixnone(UserReportFields);
+          return;
+       }
+ 
+       if(strstr(buf,"bytes_in_sites_users_report") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(BytesInSitesUsersReport,buf);
+          fixnone(BytesInSitesUsersReport);
+          return;
+       }
+ 
+       if(strstr(buf,"datafile ") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DataFile,buf);
+          fixnone(DataFile);
+          return;
+       }
+ 
+       if(strstr(buf,"datafile_delimiter") != 0) {
+-         getword(wbuf,buf,' ');
+-         getword(wbuf,buf,'"');
+-         getword(DataFileDelimiter,buf,'"');
++         getword(wbuf,buf,' ',sizeof(wbuf));
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(DataFileDelimiter,buf,'"',sizeof(DataFileDelimiter));
+          fixnone(DataFileDelimiter);
+          return;
+       }
+ 
+       if(strstr(buf,"datafile_fields") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DataFileFields,buf);
+          fixnone(DataFileFields);
+          return;
+       }
+ 
+       if(strstr(buf,"datafile_url") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DataFileUrl,buf);
+          fixnone(DataFileUrl);
+          return;
+@@ -580,7 +580,7 @@ void parmtest(char *buf)
+ 
+       if(strstr(buf,"parsed_output_log") != 0) {
+ 	 if(strstr(buf,"parsed_output_log_compress") == 0) {
+-            getword(wbuf,buf,' ');
++            getword(wbuf,buf,' ',sizeof(wbuf));
+             strcpy(ParsedOutputLog,buf);
+             fixnone(ParsedOutputLog);
+             return;
+@@ -588,195 +588,195 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"parsed_output_log_compress") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ParsedOutputLogCompress,buf);
+          fixnone(ParsedOutputLogCompress);
+          return;
+       }
+ 
+       if(strstr(buf,"displayed_values") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DisplayedValues,buf);
+          fixnone(DisplayedValues);
+          return;
+       }
+ 
+       if(strstr(buf,"authfail_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          AuthfailReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"denied_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          DeniedReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"siteusers_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          SiteUsersReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"dansguardian_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          DansGuardianReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"squidguard_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          SquidGuardReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"user_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          UserReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"download_report_limit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          DownloadReportLimit=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"www_document_root") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(wwwDocumentRoot,buf);
+          fixnone(wwwDocumentRoot);
+          return;
+       }
+ 
+       if(strstr(buf,"block_it") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(BlockIt,buf);
+          fixnone(BlockIt);
+          return;
+       }
+ 
+       if(strstr(buf,"external_css_file") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(ExternalCSSFile,buf);
+          fixnone(ExternalCSSFile);
+          return;
+       }
+ 
+       if(strstr(buf,"user_authentication") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(UserAuthentication,buf);
+          fixnone(UserAuthentication);
+          return;
+       }
+ 
+       if(strstr(buf,"AuthUserFile") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(AuthUserFile,buf);
+          fixnone(AuthUserFile);
+          return;
+       }
+ 
+       if(strstr(buf,"AuthName") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(AuthName,buf);
+          fixnone(AuthName);
+          return;
+       }
+ 
+       if(strstr(buf,"AuthType") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(AuthType,buf);
+          fixnone(AuthType);
+          return;
+       }
+ 
+       if(strstr(buf,"Require") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(Require,buf);
+          fixnone(Require);
+          return;
+       }
+ 
+       if(strstr(buf,"download_suffix") != 0) {
+-         getword(wbuf,buf,'"');
+-         getword(DownloadSuffix,buf,'"');
++         getword(wbuf,buf,'"',sizeof(wbuf));
++         getword(DownloadSuffix,buf,'"',sizeof(DownloadSuffix));
+          fixnone(DownloadSuffix);
+          return;
+       }
+ 
+       if(strstr(buf,"graphs") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(Graphs,buf);
+          fixnone(Graphs);
+          return;
+       }
+ 
+       if(strstr(buf,"graph_days_bytes_bar_color") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(GraphDaysBytesBarColor,buf);
+          fixnone(GraphDaysBytesBarColor);
+          return;
+       }
+ 
+       if(strstr(buf,"squidguard_log_format") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(SquidGuardLogFormat,buf);
+          fixnone(SquidGuardLogFormat);
+          return;
+       }
+ 
+       if(strstr(buf,"squidguard_ignore_date") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(SquidguardIgnoreDate,buf);
+          fixnone(SquidguardIgnoreDate);
+          return;
+       }
+ 
+       if(strstr(buf,"dansguardian_ignore_date") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(DansguardianIgnoreDate,buf);
+          fixnone(DansguardianIgnoreDate);
+          return;
+       }
+ 
+       if(strstr(buf,"ulimit") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(Ulimit,buf);
+          fixnone(Ulimit);
+          return;
+       }
+ 
+       if(strstr(buf,"ntlm_user_format") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(NtlmUserFormat,buf);
+          fixnone(NtlmUserFormat);
+          return;
+       }
+ 
+       if(strstr(buf,"realtime_types") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(RealtimeTypes,buf);
+          fixnone(RealtimeTypes);
+          return;
+       }
+ 
+       if(strstr(buf,"realtime_unauthenticated_records") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          strcpy(RealtimeUnauthRec,buf);
+          fixnone(RealtimeUnauthRec);
+          return;
+       }
+ 
+       if(strstr(buf,"realtime_refresh_time") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          realtime_refresh=atoi(buf);
+          return;
+       }
+ 
+       if(strstr(buf,"realtime_access_log_lines") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          realtime_access_log_lines=atoi(buf);
+          return;
+       }
+@@ -787,9 +787,9 @@ void parmtest(char *buf)
+       }
+ 
+       if(strstr(buf,"byte_cost") != 0) {
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          cost=atol(buf);
+-         getword(wbuf,buf,' ');
++         getword(wbuf,buf,' ',sizeof(wbuf));
+          nocost=my_atoll(buf);
+          return;
+       }
+diff -pruN sarg-2.2.5.orig/grepday.c sarg-2.2.5/grepday.c
+--- sarg-2.2.5.orig/grepday.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/grepday.c	2008-03-13 13:02:42.293025183 -0600
+@@ -28,7 +28,7 @@ char *fixnum(long long int value, int n)
+ char *subs(char *str, char *from, char *to);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ int blue;
+ int white;
+@@ -424,16 +424,16 @@ void greport_day(char *user, int *iprel,
+    } else strcpy(name,user);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
+-      getword(day,data,'/');
++      getword(data,buf,' ',sizeof(data));
++      getword(day,data,'/',sizeof(day));
+       if(strcmp(DateFormat,"u") == 0)
+-         getword(day,data,'/');
++         getword(day,data,'/',sizeof(day));
+       if(!count) {
+          strcpy(oday,day);
+          count++;
+       }
+-      getword(bytes,buf,' ');
+-      getword(bytes,buf,' ');
++      getword(bytes,buf,' ',sizeof(bytes));
++      getword(bytes,buf,' ',sizeof(bytes));
+       bytes[strlen(bytes)-1]='\0';
+ 
+       if(strcmp(oday,day) != 0) {
+diff -pruN sarg-2.2.5.orig/html.c sarg-2.2.5/html.c
+--- sarg-2.2.5.orig/html.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/html.c	2008-03-13 13:02:05.592471563 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void report_day(char *user, int *iprel, int *ipuser);
+ void greport_day(char *user, int *iprel, int *ipuser);
+ void fixip(char *ip);
+@@ -93,16 +93,16 @@ void htmlrel()
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+       if(strstr(buf,"TOTAL") == 0) {
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          ttnacc+=my_atoll(buf);
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          totbytes+=my_atoll(wtemp);
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          totelap+=my_atoll(wtemp);
+       }
+    }
+@@ -119,7 +119,7 @@ void htmlrel()
+       wusuario[0]='\0';
+    
+       striptxt:
+-      getword(warea,usuario,'.');
++      getword(warea,usuario,'.',sizeof(warea));
+       strcpy(denied_report,warea);
+       strcat(wusuario,warea);
+    
+@@ -162,17 +162,17 @@ void htmlrel()
+       }
+    
+       while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          tnacc+=my_atoll(wtemp);
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          tnbytes+=my_atoll(wtemp);
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          tnelap+=my_atoll(wtemp);
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          tnincache+=my_atoll(wtemp);
+-         getword(wtemp,buf,' ');
++         getword(wtemp,buf,' ',sizeof(wtemp));
+          tnoucache+=my_atoll(wtemp);
+       }
+ 
+@@ -352,13 +352,13 @@ void htmlrel()
+          sprintf(wwork3,"%s",fixnum2(nnelap,1));
+ 
+          if(strcmp(LongUrl,"yes") != 0) {
+-            getword(warea,url,'/');
++            getword(warea,url,'/',sizeof(warea));
+             sprintf(url,"%s",warea);
+             strcpy(urly,url);
+          } else {
+             strcpy(urly,url);
+             url_module(url, module);
+-            getword(warea,url,'/');
++            getword(warea,url,'/',sizeof(warea));
+             sprintf(url,"%s...%s",warea,module);
+          }
+ 
+diff -pruN sarg-2.2.5.orig/index.c sarg-2.2.5/index.c
+--- sarg-2.2.5.orig/index.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/index.c	2008-03-13 12:59:40.980290121 -0600
+@@ -27,7 +27,7 @@
+ void mklastlog();
+ void debuga(char *msg);
+ void conv_month(char *month);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void conv_month_name(char *month);
+ char* get_size(char *path, char *file);
+ void obtdate(char *dirname, char *name, char *data);
+@@ -137,7 +137,7 @@ void make_index()
+                   bzero(newname,512);
+                   strcpy(warea,direntp2->d_name);
+                   if(strstr(warea,"-") != 0) {
+-                     getword(m1,warea,'-');
++                     getword(m1,warea,'-',sizeof(m1));
+                      strcpy(m2,warea);
+                      conv_month_name(m1);
+                      conv_month_name(m2);
+@@ -148,7 +148,7 @@ void make_index()
+                   }
+                   strcpy(warea,direntp3->d_name);
+                   if(strstr(warea,"-") != 0) {
+-                     getword(d1,warea,'-');
++                     getword(d1,warea,'-',sizeof(d1));
+                      strcpy(d2,warea);
+                   } else {
+                      strcpy(d1,warea);
+@@ -205,15 +205,15 @@ void make_index()
+          obtuser(outdir,direntp->d_name,tuser);
+          obttotal(outdir,direntp->d_name,tbytes,tuser,media);
+          strcpy(html,data);
+-         getword(mon,html,' ');
+-         getword(mon,html,' ');
+-         getword(day,html,' ');
+-         getword(hour,html,' ');
+-         getword(year,html,' ');
+-         getword(year,html,' ');
++         getword(mon,html,' ',sizeof(mon));
++         getword(mon,html,' ',sizeof(mon));
++         getword(day,html,' ',sizeof(day));
++         getword(hour,html,' ',sizeof(hour));
++         getword(year,html,' ',sizeof(year));
++         getword(year,html,' ',sizeof(year));
+          strcpy(html,hour);
+-         getword(h,html,':');
+-         getword(m,html,':');
++         getword(h,html,':',sizeof(h));
++         getword(m,html,':',sizeof(m));
+          strcpy(s,html);
+          buildymd(day,mon,year,ftime);
+          fprintf(fp_tmp,"%s%s%s%s;%s;%s;%s;%s;%s;%s\n",ftime, h, m, s, direntp->d_name, data, tuser, tbytes, media,newname);
+@@ -243,7 +243,7 @@ void make_index()
+       write_html_header(fp_ou, ".");
+       fprintf(fp_ou,"<tr><th %s>%s</th><th %s>%s</th></tr>\n",hbc1,text[130],hbc1,text[132]);
+       while(fgets(wwork1,MAXLEN,fp_tmp)!=NULL) {
+-         getword(tmp4,wwork1,' ');
++         getword(tmp4,wwork1,' ',sizeof(tmp4));
+          fprintf(fp_ou,"<tr><td class=\"data2\"><a href=\"%s\">%s</a></td><td class=\"data2\">%s</td></tr>\n",tmp4,tmp4,wwork1);
+          sprintf(tmp2,"%s%s",outdir,tmp4);
+          sprintf(tmp3,"%s%s/index.unsort",outdir,tmp4);
+@@ -280,7 +280,7 @@ void make_index()
+             wwork1[strlen(wwork1)-1]='\0';        
+             strcpy(tmp5,wwork1);
+             if(strstr(tmp5,"-") != 0) {
+-               getword(warea,tmp5,'-');
++               getword(warea,tmp5,'-',sizeof(warea));
+                name_month(warea);
+                sprintf(tmp6,"%s-",warea);
+                name_month(tmp5);
+@@ -360,12 +360,12 @@ void make_index()
+          exit(1);
+       }
+       while(fgets(buf,MAXLEN,fp_tmp2)!=NULL) {
+-         getword(period,buf,';');
+-         getword(period,buf,';');
+-         getword(data,buf,';');
+-         getword(tuser,buf,';');
+-         getword(tbytes,buf,';');
+-         getword(media,buf,';');
++         getword(period,buf,';',sizeof(period));
++         getword(period,buf,';',sizeof(period));
++         getword(data,buf,';',sizeof(data));
++         getword(tuser,buf,';',sizeof(tuser));
++         getword(tbytes,buf,';',sizeof(tbytes));
++         getword(media,buf,';',sizeof(media));
+          fprintf(fp_ou,"<tr><td class=\"data2\"><a href='%s/%s'>%s</a></td><td class=\"data2\">%s</td><td class=\"data\">%s</td><td class=\"data\">%s</td><td class=\"data\">%s</td></tr>\n",period,ReplaceIndex,period,data,tuser,tbytes,media);
+       }
+       if(fp_tmp2) fclose(fp_tmp2);
+diff -pruN sarg-2.2.5.orig/ip2name.c sarg-2.2.5/ip2name.c
+--- sarg-2.2.5.orig/ip2name.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/ip2name.c	2008-03-13 12:58:04.398833212 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void ip2name(char *ip)
+ { 
+@@ -60,7 +60,7 @@ void name2ip(char *name)
+    char   n4[4];
+ 
+    if(strstr(name,":") > 0) {
+-      getword(work,name,':');
++      getword(work,name,':',sizeof(work));
+       strcpy(name,work);
+    }
+ 
+@@ -70,9 +70,9 @@ void name2ip(char *name)
+       memcpy(&ia.s_addr,hp->h_addr_list[0],sizeof(ia.s_addr));
+       ia.s_addr=ntohl(ia.s_addr);
+       sprintf(name,"%s",inet_ntoa(ia));
+-      getword(n4,name,'.');
+-      getword(n3,name,'.');
+-      getword(n2,name,'.');
++      getword(n4,name,'.',sizeof(n4));
++      getword(n3,name,'.',sizeof(n3));
++      getword(n2,name,'.',sizeof(n2));
+       strcpy(n1,name);
+       sprintf(name,"%s.%s.%s.%s",n1,n2,n3,n4);
+ 
+diff -pruN sarg-2.2.5.orig/language.c sarg-2.2.5/language.c
+--- sarg-2.2.5.orig/language.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/language.c	2008-03-13 12:57:14.568081526 -0600
+@@ -25,7 +25,7 @@
+ 
+ #include "include/conf.h"
+ 
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void language_load(char *language)
+ {
+@@ -41,8 +41,8 @@ void language_load(char *language)
+    }
+ 
+    while(fgets(buf,MAXLEN,fp_text)!=NULL) {
+-      getword(warea,buf,'"');
+-      getword(warea,buf,'"');
++      getword(warea,buf,'"',sizeof(warea));
++      getword(warea,buf,'"',sizeof(warea));
+       strcpy(text[record],warea);
+ 
+       if(langcode)
+diff -pruN sarg-2.2.5.orig/lastlog.c sarg-2.2.5/lastlog.c
+--- sarg-2.2.5.orig/lastlog.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/lastlog.c	2008-03-13 12:56:56.487808790 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void debuga(char *msg);
+ 
+ void mklastlog()
+@@ -90,7 +90,7 @@ void mklastlog()
+    }
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(warea,buf,' ');
++      getword(warea,buf,' ',sizeof(warea));
+       buf[strlen(buf)-1]='\0';
+      
+       if(ftot) {
+diff -pruN sarg-2.2.5.orig/log.c sarg-2.2.5/log.c
+--- sarg-2.2.5.orig/log.c	2008-03-13 11:48:50.158254374 -0600
++++ sarg-2.2.5/log.c	2008-03-13 13:20:53.631007913 -0600
+@@ -50,7 +50,7 @@ int compar( const void *, const void * )
+ #define _FILE_OFFSET_BITS 64
+ 
+ void language_load(char *language);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void date_from(char *date, char *dfrom, char *duntil);
+ void usage(char *prog);
+ void version();
+@@ -330,7 +330,7 @@ int main(argc,argv)
+          case 'd':
+             strcpy(date,optarg);
+             strcpy(cduntil,optarg);
+-            getword(cdfrom,cduntil,'-');
++            getword(cdfrom,cduntil,'-',sizeof(cdfrom));
+             date_from(date, cdfrom, cduntil);
+             dfrom=atoi(cdfrom);
+             duntil=atoi(cduntil);
+@@ -381,7 +381,7 @@ int main(argc,argv)
+               strcpy(hm,optarg);
+               strcpy(hmf,optarg);
+             } else {
+-               getword(hm,optarg,'-');
++               getword(hm,optarg,'-',sizeof(hm));
+                strcpy(hmf,optarg);
+             }
+             if(strlen(hm) > 5) {
+@@ -390,13 +390,13 @@ int main(argc,argv)
+             }
+             bzero(whm,15);
+             if(strstr(hm,":") != 0) {
+-               getword(warea,hm,':');
++               getword(warea,hm,':',sizeof(warea));
+                sprintf(whm,"%s%s",warea,hm);
+                strcpy(hm,whm);
+             }
+             bzero(whm,15);
+             if(strstr(hmf,":") != 0) {
+-               getword(warea,hmf,':');
++               getword(warea,hmf,':',sizeof(warea));
+                sprintf(whm,"%s%s",warea,hmf);
+                strcpy(hmf,whm);
+             }
+@@ -722,7 +722,7 @@ int main(argc,argv)
+       while(fgets(buf,MAXLEN,fp_usr)!=NULL) {
+          buf[strlen(buf)-1]='\0';
+          if(strstr(buf,"\r") != 0) buf[strlen(buf)-1]='\0';
+-         getword(bufy,buf,' ');
++         getword(bufy,buf,' ',sizeof(bufy));
+          for(z1=0; z1<=strlen(bufy); z1++) {
+             userfile[z2]=bufy[z1];
+             z2++;
+@@ -763,10 +763,10 @@ int main(argc,argv)
+    if(!isalog && strncmp(bufz,"#Software: Mic",14) == 0) isalog++;
+ 
+    if(strncmp(bufz,"*** SARG Log ***",16) == 0) {
+-      getword(val2,arqtt,'-');
+-      getword(val2,arqtt,'_');
+-      getword(val3,arqtt,'-');
+-      getword(val3,arqtt,'_');
++      getword(val2,arqtt,'-',sizeof(val2));
++      getword(val2,arqtt,'_',sizeof(val2));
++      getword(val3,arqtt,'-',sizeof(val3));
++      getword(val3,arqtt,'_',sizeof(val3));
+       sprintf(period,"%s-%s",val2,val3);
+       sarglog=1;
+    } else rewind(fp_in);
+@@ -846,7 +846,7 @@ int main(argc,argv)
+            strcpy(warea,bufz);
+            strcpy(html,ExcludeString);
+            while(strstr(html,":") != 0) {
+-              getword(val1,html,':');
++              getword(val1,html,':',sizeof(val1));
+               if((str=(char *) strstr(warea,val1)) != (char *) NULL )
+                  exstring++;
+            }
+@@ -865,29 +865,29 @@ int main(argc,argv)
+        	   printf("BUF=%s\n",bufz);
+ 
+         if(!sarglog && !isalog) {
+-           getword(data,bufz,' ');
++           getword(data,bufz,' ',sizeof(data));
+            if((str=(char *) strstr(data, ".")) != (char *) NULL ) {
+               if((str=(char *) strstr(str+1, ".")) != (char *) NULL ) {
+                  strcpy(ip,data);
+        	         strcpy(elap,"0");
+ 		 if(squid24) {
+-                    getword(user,bufz,' ');
+-                    getword(none,bufz,' ');
++                    getword(user,bufz,' ',sizeof(user));
++                    getword(none,bufz,' ',sizeof(none));
+ 		 } else {
+-	            getword(none,bufz,' ');
+-   	            getword(user,bufz,' ');
++	            getword(none,bufz,' ',sizeof(none));
++   	            getword(user,bufz,' ',sizeof(user));
+ 		 }
+-	         getword(data,bufz,']');
+-	         getword(fun,bufz,'"');
+-	         getword(fun,bufz,' ');
+-	         getword(url,bufz,' ');
+-                 getword(code2,bufz,' ');
+-                 getword(code2,bufz,' ');
+-                 getword(tam,bufz,' ');
++	         getword(data,bufz,']',sizeof(data));
++	         getword(fun,bufz,'"',sizeof(fun));
++	         getword(fun,bufz,' ',sizeof(fun));
++	         getword(url,bufz,' ',sizeof(url));
++                 getword(code2,bufz,' ',sizeof(code2));
++                 getword(code2,bufz,' ',sizeof(code2));
++                 getword(tam,bufz,' ',sizeof(tam));
+ 
+ 
+                  if((str=(char *) strstr(bufz, " ")) != (char *) NULL )
+-                    getword(code,bufz,' ');
++                    getword(code,bufz,' ',sizeof(code));
+                  else strcpy(code,bufz);
+ 
+                  if ((str = strchr(code, ':')) != NULL)
+@@ -902,37 +902,37 @@ int main(argc,argv)
+ 	   }
+ 
+ 	   if(!common) {
+-	      getword(elap,bufz,' ');
++	      getword(elap,bufz,' ',sizeof(elap));
+ 	      while(strcmp(elap,"") == 0 && strlen(bufz) > 0)
+-	         getword(elap,bufz,' ');
++	         getword(elap,bufz,' ',sizeof(elap));
+               if(strlen(elap) < 1) continue;
+-	      getword(ip,bufz,' ');
+-	      getword(code,bufz,' ');
+-	      getword(tam,bufz,' ');
+-	      getword(fun,bufz,' ');
+-	      getword(url,bufz,' ');
++	      getword(ip,bufz,' ',sizeof(ip));
++	      getword(code,bufz,' ',sizeof(code));
++	      getword(tam,bufz,' ',sizeof(tam));
++	      getword(fun,bufz,' ',sizeof(fun));
++	      getword(url,bufz,' ',sizeof(url));
+ //              while (strstr(bufz,"%20") != 0) {
+-//                 getword(warea,bufz,' ');
++//                 getword(warea,bufz,' ',sizeof(warea));
+ //                 strcat(url,warea);
+ //              }
+-	      getword(user,bufz,' ');
++	      getword(user,bufz,' ',sizeof(user));
+ 	      squid_log=1;
+ 	   }
+         } else if(!isalog) {
+-	   getword(data,bufz,' ');
+-	   getword(hora,bufz,' ');
+-	   getword(user,bufz,' ');
+-	   getword(ip,bufz,' ');
+-	   getword(url,bufz,' ');
+-	   getword(tam,bufz,' ');
+-	   getword(code,bufz,' ');
+-	   getword(elap,bufz,' ');
+-	   getword(smartfilter,bufz,' ');
++	   getword(data,bufz,' ',sizeof(data));
++	   getword(hora,bufz,' ',sizeof(hora));
++	   getword(user,bufz,' ',sizeof(user));
++	   getword(ip,bufz,' ',sizeof(ip));
++	   getword(url,bufz,' ',sizeof(url));
++	   getword(tam,bufz,' ',sizeof(tam));
++	   getword(code,bufz,' ',sizeof(code));
++	   getword(elap,bufz,' ',sizeof(elap));
++	   getword(smartfilter,bufz,' ',sizeof(smartfilter));
+         } else if(isalog) {
+            if(!i0) {
+-              getword(val1,bufz,' ');
++              getword(val1,bufz,' ',sizeof(val1));
+               while(strstr(bufz,"\t") != 0) {
+-                 getword(val1,bufz,'\t');
++                 getword(val1,bufz,'\t',sizeof(val1));
+                  i0++;
+                  if(strcmp(val1,"c-ip") == 0) i1=i0;
+                  if(strcmp(val1,"cs-username") == 0) i2=i0;
+@@ -966,8 +966,8 @@ int main(argc,argv)
+               sprintf(val1,"DENIED/%s",code);
+               strcpy(code,val1);
+            }
+-           getword(ano,data,'-');
+-           getword(mes,data,'-');
++           getword(ano,data,'-',sizeof(ano));
++           getword(mes,data,'-',sizeof(mes));
+            strcpy(dia,data);
+            conv_month_name(mes);
+            sprintf(data," %s/%s/%s:%s",dia,mes,ano,hora);
+@@ -996,12 +996,12 @@ int main(argc,argv)
+ 	   continue;
+ 
+         if(strstr(user,"%20") != 0) {
+-           getword(w,user,'%');
++           getword(w,user,'%',sizeof(w));
+            strcpy(user,w);
+         }
+ 
+         while(strstr(user,"%5c") != 0) {
+-           getword(w,user,'%');
++           getword(w,user,'%',sizeof(w));
+            strcpy(wuser,user+2);
+            sprintf(user,"%s.%s",w,wuser);
+         }
+@@ -1018,9 +1018,9 @@ int main(argc,argv)
+         strlow(user);
+         if(strncmp(NtlmUserFormat,"user",4) == 0) {
+            if(strstr(user,"_") != 0)
+-              getword(warea,user,'_');  
++              getword(warea,user,'_',sizeof(warea));
+            if(strstr(user,"+") != 0)
+-              getword(warea,user,'+');  
++              getword(warea,user,'+',sizeof(warea));
+         }
+ 
+         if(strstr(ReportType,"denied") != 0)
+@@ -1040,8 +1040,8 @@ int main(argc,argv)
+         }
+          
+         if (strchr(url,'/')) {
+-           getword(w,url,'/');
+-           getword(w,url,'/');
++           getword(w,url,'/',sizeof(w));
++           getword(w,url,'/',sizeof(w));
+           if (!strchr(url,'/')) {
+               totregsx++;
+               continue;
+@@ -1049,10 +1049,10 @@ int main(argc,argv)
+         }
+ 
+         if(strcmp(LongUrl,"no") == 0) {
+-           getword(w,url,'/');
++           getword(w,url,'/',sizeof(w));
+            strcpy(url,w);
+            if(strlen(url) > 512 && strstr(url,"%") != 0) {
+-              getword(w,url,'%');
++              getword(w,url,'%',sizeof(w));
+               strcpy(url,w);
+            }
+         }
+@@ -1082,22 +1082,22 @@ int main(argc,argv)
+               sprintf(hora,"%02d:%02d:%02d",t->tm_hour,t->tm_min,t->tm_sec);
+ 	    } else {
+ 	      strcpy(wtemp,data+1);
+-	      getword(data,wtemp,':');
+-	      getword(hora,wtemp,' ');
+-	      getword(dia,data,'/');
+-	      getword(mes,data,'/');
+-	      getword(ano,data,'/');
++	      getword(data,wtemp,':',sizeof(data));
++	      getword(hora,wtemp,' ',sizeof(hora));
++	      getword(dia,data,'/',sizeof(dia));
++	      getword(mes,data,'/',sizeof(mes));
++	      getword(ano,data,'/',sizeof(ano));
+ 
+               if(strcmp(df,"u") == 0)
+-	         sprintf(tbuf,"%s%s%s",ano,mes,dia);
++	         snprintf(tbuf,sizeof(tbuf),"%s%s%s",ano,mes,dia);
+               if(strcmp(df,"e") == 0)
+-	         sprintf(tbuf,"%s%s%s",dia,mes,ano);
++	         snprintf(tbuf,sizeof(tbuf),"%s%s%s",dia,mes,ano);
+ 	      builddia(dia,mes,ano,df,wdata);
+               idata=atoi(wdata);
+ 	   }
+         } else {
+-	   getword(mes,data,'/');
+-	   getword(dia,data,'/');
++	   getword(mes,data,'/',sizeof(mes));
++	   getword(dia,data,'/',sizeof(dia));
+ 	   strcpy(ano,data);
+         }
+ 
+@@ -1135,7 +1135,7 @@ int main(argc,argv)
+               bzero(hmr,15);
+               chm++;
+               while(chm) {
+-                 getword(warea,whm,':');
++                 getword(warea,whm,':',sizeof(warea));
+                  strncat(hmr,warea,2);
+                  chm--;
+               }
+@@ -1400,8 +1400,8 @@ int main(argc,argv)
+    if(strcmp(ParsedOutputLog, "no") != 0 && !sarglog) {
+       fclose(fp_log); 
+       strcpy(val1,period);
+-      getword(val2,val1,'-');
+-      getword(val3,per_hour,'-');
++      getword(val2,val1,'-',sizeof(val2));
++      getword(val3,per_hour,'-',sizeof(val3));
+       sprintf(val4,"%s/sarg-%s_%s-%s_%s.log",ParsedOutputLog,val2,val3,val1,per_hour);
+       rename(arq_log,val4);
+       strcpy(arq_log,val4);
+@@ -1492,7 +1492,7 @@ void getusers(char *pwdfile, int debug)
+    sprintf(userfile,":");
+ 
+    while(fgets(buf,255,fp_usr)!=NULL) {
+-     getword(user,buf,':');
++     getword(user,buf,':',sizeof(user));
+      strncat(userfile,user,strlen(user));
+      strncat(userfile,":",1);
+    }
+diff -pruN sarg-2.2.5.orig/realtime.c sarg-2.2.5/realtime.c
+--- sarg-2.2.5.orig/realtime.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/realtime.c	2008-03-13 12:50:25.021903615 -0600
+@@ -29,7 +29,7 @@ void getdata(char *, FILE *);
+ void datashow(char *);
+ void getlog();
+ void header();
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void debuga(char *msg);
+ void getword3(char *word, char *line, int stop);
+ void ip2name(char *ip);
+@@ -81,7 +81,7 @@ void getlog()
+       while(fgets(buf,MAXLEN,fp_usr)!=NULL){
+         buf[strlen(buf)-1]='\0';
+         if(strstr(buf,"\r") != 0) buf[strlen(buf)-1]='\0';
+-        getword(bufy,buf,' ');
++        getword(bufy,buf,' ',sizeof(bufy));
+         for(z1=0; z1<=strlen(bufy); z1++) {
+            userfile[z2]=bufy[z1];
+            z2++;
+diff -pruN sarg-2.2.5.orig/repday.c sarg-2.2.5/repday.c
+--- sarg-2.2.5.orig/repday.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/repday.c	2008-03-13 12:48:39.810316523 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+ void fixip(char *ip);
+@@ -148,14 +148,14 @@ void report_day(char *user, int *iprel, 
+      "<td class=\"header3\">%s<br>%s</td></tr>\n", text[107], html );
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
++      getword(data,buf,' ',sizeof(data));
+       if(!count) {
+          strcpy(odata,data);
+          count++;
+       }
+ 
+-      getword(hour,buf,' ');
+-      getword(elap,buf,' ');
++      getword(hour,buf,' ',sizeof(hour));
++      getword(elap,buf,' ',sizeof(elap));
+       elap[strlen(elap)-1]='\0';
+ 
+       if(strcmp(data,odata) != 0) {
+diff -pruN sarg-2.2.5.orig/report.c sarg-2.2.5/report.c
+--- sarg-2.2.5.orig/report.c	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/report.c	2008-03-13 12:49:58.921509897 -0600
+@@ -29,7 +29,7 @@ void vrfydir(char *dir, char *per1, char
+ void debugaz(char *head, char *msg);
+ void gperiod();
+ void useragent();
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void ip2name(char *ip);
+ void my_mkdir(char *name);
+ void css(FILE *fp_css);
+@@ -117,7 +117,7 @@ void gerarel()
+     
+       strcpy(wdname,direntp->d_name);
+       strip_prefix:
+-      getword(wname2,wdname,'.');
++      getword(wname2,wdname,'.',sizeof(wname2));
+       strcat(user,wname2);
+    
+       if(strcmp(wdname,"log") !=0) {
+@@ -133,17 +133,17 @@ void gerarel()
+       bzero(html_old, MAXLEN);
+    
+       while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-         getword(accdia,buf,' ');
+-         getword(acchora,buf,' ');
+-         getword(accuser,buf,' ');
+-         getword(accip,buf,' ');
+-         getword(accurl,buf,' ');
+-         getword(accbytes,buf,' ');
+-         getword(acccode,buf,' ');
++         getword(accdia,buf,' ',sizeof(accdia));
++         getword(acchora,buf,' ',sizeof(acchora));
++         getword(accuser,buf,' ',sizeof(accuser));
++         getword(accip,buf,' ',sizeof(accip));
++         getword(accurl,buf,' ',sizeof(accurl));
++         getword(accbytes,buf,' ',sizeof(accbytes));
++         getword(acccode,buf,' ',sizeof(acccode));
+          if(strncmp(acccode,"TCP_DENIED/407",14) == 0) continue;
+-         getword(accelap,buf,' ');
+-         getword(accsmart,buf,' ');
+-         getword(accsmart,buf,'"');
++         getword(accelap,buf,' ',sizeof(accelap));
++         getword(accsmart,buf,' ',sizeof(accsmart));
++         getword(accsmart,buf,'"',sizeof(accsmart));
+    
+          if(strlen(accsmart) > 0) {
+             smartfilter++;
+@@ -307,7 +307,7 @@ void gerarel()
+       } else bzero(ltext110, 50);
+ 
+       strcpy(wcrc,acccode);
+-      getword(crc2,wcrc,'/');
++      getword(crc2,wcrc,'/',sizeof(crc2));
+ 
+       if(strstr(crc2,"MISS") != 0)
+          oucache+=my_atoll(accbytes);
+diff -pruN sarg-2.2.5.orig/siteuser.c sarg-2.2.5/siteuser.c
+--- sarg-2.2.5.orig/siteuser.c	2008-03-13 11:48:50.058252866 -0600
++++ sarg-2.2.5/siteuser.c	2008-03-13 12:46:47.338619913 -0600
+@@ -27,7 +27,7 @@
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+ char *strlow(char *string);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ char *subs(char *str, char *from, char *to);
+ void ip2name(char *ip);
+@@ -130,7 +130,7 @@ void siteuser()
+    strcat(users," ");
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(user,buf,' ');
++      getword(user,buf,' ',sizeof(user));
+       if(strcmp(user,"TOTAL") == 0)
+          continue;
+       if(userip)
+@@ -161,10 +161,10 @@ void siteuser()
+       if(strcmp(Ip2Name,"yes") == 0)
+          ip2name(user);
+ 
+-      getword(nacc,buf,' ');
++      getword(nacc,buf,' ',sizeof(nacc));
+       if (atoi(nacc) > 0) nsitesusers = 1;
+-      getword(nbytes,buf,' ');
+-      getword(url,buf,' ');
++      getword(nbytes,buf,' ',sizeof(nbytes));
++      getword(url,buf,' ',sizeof(url));
+ 
+       if(!regs) {
+          strcpy(ourl,url);
+diff -pruN sarg-2.2.5.orig/smartfilter.c sarg-2.2.5/smartfilter.c
+--- sarg-2.2.5.orig/smartfilter.c	2008-03-13 11:48:50.058252866 -0600
++++ sarg-2.2.5/smartfilter.c	2008-03-13 12:46:18.448184107 -0600
+@@ -25,7 +25,7 @@
+ 
+ #include "include/conf.h"
+ char *strup(char *string);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void zdate(char *ftime, char *DateFormat);
+ 
+@@ -108,12 +108,12 @@ void smartfilter_report()
+    fprintf(fp_ou,"<tr><th bgcolor=%s><font size=%s>%s</font></th><th bgcolor=%s><font size=%s>%s</font></th><th bgcolor=%s><font size=%s>%s</font></th><th bgcolor=%s><font size=%s>%s</font></th><th bgcolor=%s><font size=%s>%s</font></th></tr>\n",HeaderBgColor,FontSize,text[98],HeaderBgColor,FontSize,text[111],HeaderBgColor,FontSize,text[110],HeaderBgColor,FontSize,text[91],HeaderBgColor,FontSize,smartheader);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(user,buf,' ');
+-      getword(data,buf,' ');
+-      getword(hora,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
+-      getword(smartcat,buf,'\n');
++      getword(user,buf,' ',sizeof(user));
++      getword(data,buf,' ',sizeof(data));
++      getword(hora,buf,' ',sizeof(hora));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
++      getword(smartcat,buf,'\n',sizeof(smartcat));
+ 
+       if((str=(char *) strstr(user, "_")) != (char *) NULL ) {
+          if((str=(char *) strstr(str+1, "_")) != (char *) NULL )
+diff -pruN sarg-2.2.5.orig/sort.c sarg-2.2.5/sort.c
+--- sarg-2.2.5.orig/sort.c	2008-03-13 11:48:50.058252866 -0600
++++ sarg-2.2.5/sort.c	2008-03-13 12:31:29.114768715 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void debuga(char *msg);
+ char *strup(char *string);
+ char *strlow(char *string);
+@@ -57,7 +57,7 @@ void tmpsort()
+  
+       wnome[0]='\0'; 
+       striptmp:
+-      getword(wnome2,wentp,'.');
++      getword(wnome2,wentp,'.',sizeof(wnome2));
+       strcat(wnome,wnome2);
+ 
+       if(strcmp(wentp,"utmp") !=0) {
+@@ -140,7 +140,7 @@ void sort_users_log(char *tmp, int debug
+ 
+       bzero(user, MAXLEN);
+       strip_unsort:
+-      getword(wname2,wdname,'.');
++      getword(wname2,wdname,'.',sizeof(wname2));
+       strcat(user,wname2);
+ 
+       if(strcmp(wdname,"unsort") !=0) {
+diff -pruN sarg-2.2.5.orig/splitlog.c sarg-2.2.5/splitlog.c
+--- sarg-2.2.5.orig/splitlog.c	2008-03-13 11:48:50.058252866 -0600
++++ sarg-2.2.5/splitlog.c	2008-03-13 12:30:56.684279508 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ 
+ void splitlog(char *arq, char *df, int dfrom, int duntil, char *convert)
+ {
+@@ -48,7 +48,7 @@ void splitlog(char *arq, char *df, int d
+    }
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(data,buf,' ');
++      getword(data,buf,' ',sizeof(data));
+       tt=atoi(data);
+       t=localtime(&tt);
+ 
+diff -pruN sarg-2.2.5.orig/squidguard_log.c sarg-2.2.5/squidguard_log.c
+--- sarg-2.2.5.orig/squidguard_log.c	2008-03-13 11:48:50.058252866 -0600
++++ sarg-2.2.5/squidguard_log.c	2008-03-13 12:44:34.516616323 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void debuga(char *msg);
+ void conv_month(char *month);
+ 
+@@ -45,8 +45,8 @@ void read_log(char *wentp, FILE *fp_ou)
+ 
+    if(debug) {
+       strcpy(buf,text[7]);
+-      getword(urly,buf,' ');
+-      getword(href,buf,' ');
++      getword(urly,buf,' ',sizeof(urly));
++      getword(href,buf,' ',sizeof(href));
+       sprintf(msg,"%s squidGuard %s: %s",urly,buf,wentp);
+       debuga(msg);
+    }
+@@ -98,12 +98,12 @@ void read_log(char *wentp, FILE *fp_ou)
+       if(strlen(SquidGuardLogFormat) > 0) {
+          strcpy(bufbsf,SquidGuardLogFormat);
+          leks[0]='\0';
+-         getword(leks,bufbsf,'#');
++         getword(leks,bufbsf,'#',sizeof(leks));
+          while(strcmp(leks,"end") != 0) {
+-            getword(leks,bufbsf,'#');
+-            getword(sep,bufbsf,'#');
++            getword(leks,bufbsf,'#',sizeof(leks));
++            getword(sep,bufbsf,'#',sizeof(sep));
+             if(strcmp(leks,"end") != 0) {
+-               getword(res,buf,sep[0]);
++               getword(res,buf,sep[0],sizeof(res));
+                if(strcmp(leks,"year") == 0)
+                   strcpy(year,res);
+                else if(strcmp(leks,"year") == 0)
+@@ -125,19 +125,19 @@ void read_log(char *wentp, FILE *fp_ou)
+             }
+          }
+       } else {
+-         getword(year,buf,'-');
+-         getword(mon,buf,'-');
+-         getword(day,buf,' ');
+-         getword(hour,buf,' ');
+-         getword(list,buf,'/');
+-         getword(list,buf,'/');
+-         getword(tmp5,buf,'/');
+-         getword(tmp5,buf,'/');
+-         getword(url,buf,'/');
+-         getword(ip,buf,' ');
+-         getword(ip,buf,'/');
+-         getword(user,buf,' ');
+-         getword(user,buf,' ');
++         getword(year,buf,'-',sizeof(year));
++         getword(mon,buf,'-',sizeof(mon));
++         getword(day,buf,' ',sizeof(day));
++         getword(hour,buf,' ',sizeof(hour));
++         getword(list,buf,'/',sizeof(list));
++         getword(list,buf,'/',sizeof(list));
++         getword(tmp5,buf,'/',sizeof(tmp5));
++         getword(tmp5,buf,'/',sizeof(tmp5));
++         getword(url,buf,'/',sizeof(url));
++         getword(ip,buf,' ',sizeof(ip));
++         getword(ip,buf,'/',sizeof(ip));
++         getword(user,buf,' ',sizeof(user));
++         getword(user,buf,' ',sizeof(user));
+       }
+ 
+       sprintf(warea,"%s%s%s",year,mon,day);
+@@ -238,8 +238,8 @@ void squidguard_log()
+          if(strstr(buf,"\n") != 0)
+             buf[strlen(buf)-1]='\0';
+          if(strstr(buf,"logdir ") != 0) {
+-            getword(logdir,buf,' ');
+-            getword(logdir,buf,' ');
++            getword(logdir,buf,' ',sizeof(logdir));
++            getword(logdir,buf,' ',sizeof(logdir));
+          }
+          if((str=(char *) strstr(buf, "log")) != (char *) NULL )  {
+             str=str+3;
+@@ -257,11 +257,11 @@ void squidguard_log()
+                }
+             }
+             if(strchr(str2,' ') != 0) {
+-               getword(warea,str2,' ');
++               getword(warea,str2,' ',sizeof(warea));
+                strcpy(str2,warea);
+             }
+             if(strchr(str2,'#') != 0) {
+-               getword(warea,str2,'#');
++               getword(warea,str2,'#',sizeof(warea));
+                strcpy(str2,warea);
+             }
+             sprintf(wentp,"%s/%s",logdir,str2);
+diff -pruN sarg-2.2.5.orig/squidguard_report.c sarg-2.2.5/squidguard_report.c
+--- sarg-2.2.5.orig/squidguard_report.c	2008-03-13 11:48:50.068253016 -0600
++++ sarg-2.2.5/squidguard_report.c	2008-03-13 12:45:16.327247027 -0600
+@@ -26,7 +26,7 @@
+ #include "include/conf.h"
+ void css(FILE *fp_css);
+ void show_sarg(FILE *fp_ou, char *ind);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void fixip(char *ip);
+ void ip2name(char *ip);
+ char *subs(char *str, char *from, char *to);
+@@ -111,12 +111,12 @@ void squidguard_report()
+    fputs(url,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(user,buf,' ');
+-      getword(data2,buf,' ');
+-      getword(hora,buf,' ');
+-      getword(ip,buf,' ');
+-      getword(url,buf,' ');
+-      getword(rule,buf,'\n');
++      getword(user,buf,' ',sizeof(user));
++      getword(data2,buf,' ',sizeof(data2));
++      getword(hora,buf,' ',sizeof(hora));
++      getword(ip,buf,' ',sizeof(ip));
++      getword(url,buf,' ',sizeof(url));
++      getword(rule,buf,'\n',sizeof(rule));
+ 
+       if(strcmp(UserIp,"yes") == 0)
+            strcpy(user,ip);
+diff -pruN sarg-2.2.5.orig/topsites.c sarg-2.2.5/topsites.c
+--- sarg-2.2.5.orig/topsites.c	2008-03-13 11:48:50.068253016 -0600
++++ sarg-2.2.5/topsites.c	2008-03-13 12:30:27.913845513 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void my_lltoa(unsigned long long int n, char s[], int len);
+ char *strlow(char *string);
+ void css(FILE *fp_css);
+@@ -99,20 +99,20 @@ void topsites()
+    }
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(url,buf,' ');
++      getword(url,buf,' ',sizeof(url));
+       if(strcmp(url,"TOTAL") == 0) {
+-         getword(ttnacc,buf,' ');
+-         getword(ttnbytes,buf,' ');
+-         getword(ttntime,buf,' ');
++         getword(ttnacc,buf,' ',sizeof(ttnacc));
++         getword(ttnbytes,buf,' ',sizeof(ttnbytes));
++         getword(ttntime,buf,' ',sizeof(ttntime));
+          continue;
+       }
+-      getword(nacc,buf,' ');
+-      getword(nbytes,buf,' ');
+-      getword(url,buf,' ');
+-      getword(ntemp,buf,' ');
+-      getword(ntemp,buf,' ');
+-      getword(ntemp,buf,' ');
+-      getword(ntime,buf,' ');
++      getword(nacc,buf,' ',sizeof(nacc));
++      getword(nbytes,buf,' ',sizeof(nbytes));
++      getword(url,buf,' ',sizeof(url));
++      getword(ntemp,buf,' ',sizeof(ntemp));
++      getword(ntemp,buf,' ',sizeof(ntemp));
++      getword(ntemp,buf,' ',sizeof(ntemp));
++      getword(ntime,buf,' ',sizeof(ntime));
+ 
+       if(!regs) {
+          strcpy(ourl,url);
+@@ -211,12 +211,12 @@ void topsites()
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+       if(regs>atoi(TopSitesNum))
+          break;
+-      getword(nacc,buf,' ');
++      getword(nacc,buf,' ',sizeof(nacc));
+       if (atoi(nacc) == 0) continue;
+ 
+-      getword(nbytes,buf,' ');
+-      getword(ntime,buf,' ');
+-      getword(url,buf,' ');
++      getword(nbytes,buf,' ',sizeof(nbytes));
++      getword(ntime,buf,' ',sizeof(ntime));
++      getword(url,buf,' ',sizeof(url));
+ 
+       twork1=my_atoll(nacc);
+       twork2=my_atoll(nbytes);
+diff -pruN sarg-2.2.5.orig/totday.c sarg-2.2.5/totday.c
+--- sarg-2.2.5.orig/totday.c	2008-03-13 11:48:50.068253016 -0600
++++ sarg-2.2.5/totday.c	2008-03-13 12:28:47.882336560 -0600
+@@ -24,7 +24,7 @@
+  */
+ 
+ #include "include/conf.h"
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void my_lltoa(unsigned long long int n, char s[], int len);
+ 
+ void day_totalize(const char *tmp, char *user, int indexonly)
+@@ -75,10 +75,10 @@ void day_totalize(const char *tmp, char 
+       if(strstr(buf,"\n") != 0)
+          buf[strlen(buf)-1]='\0';
+          
+-      getword(data,buf,' ');
+-      getword(hora,buf,':');
+-      getword(min,buf,':');
+-      getword(elap,buf,' ');
++      getword(data,buf,' ',sizeof(data));
++      getword(hora,buf,':',sizeof(hora));
++      getword(min,buf,':',sizeof(min));
++      getword(elap,buf,' ',sizeof(elap));
+       strcpy(elap,buf);
+       sprintf(hm,"%s%s",hora,min);
+ 
+diff -pruN sarg-2.2.5.orig/useragent.c sarg-2.2.5/useragent.c
+--- sarg-2.2.5.orig/useragent.c	2008-03-13 11:48:50.078253167 -0600
++++ sarg-2.2.5/useragent.c	2008-03-13 13:33:06.657836687 -0600
+@@ -25,7 +25,7 @@
+ 
+ #include "include/conf.h"
+ void debuga(char *msg);
+-void getword(char *word, char *line, int stop);
++void getword(char *word, char *line, int stop, int limit);
+ void show_sarg(FILE *fp_ou, char *ind);
+ void ip2name(char *ip);
+ void zdate(char *ftime, char *DateFormat);
+@@ -75,13 +75,13 @@ void useragent()
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+       totregsl++;
+-      getword(ip,buf,' ');
+-      getword(data,buf,'[');
+-      getword(data,buf,' ');
++      getword(ip,buf,' ',sizeof(ip));
++      getword(data,buf,'[',sizeof(data));
++      getword(data,buf,' ',sizeof(data));
+       if(totregsl == 1)
+          strcpy(idate,data);
+-      getword(agent,buf,'"');
+-      getword(agent,buf,'"');
++      getword(agent,buf,'"',sizeof(agent));
++      getword(agent,buf,'"',sizeof(agent));
+ 
+       strcpy(warea,agent);
+       strup(warea);
+@@ -89,8 +89,8 @@ void useragent()
+          baddata();
+ 
+       if(strlen(buf)) {
+-         getword(user,buf,' ');
+-         getword(user,buf,'\n');
++         getword(user,buf,' ',sizeof(user));
++         getword(user,buf,'\n',sizeof(user));
+       }
+ 
+       if(user[0] == '-')
+@@ -98,7 +98,7 @@ void useragent()
+       if(strlen(user) == 0)
+          strcpy(user,ip);
+ 
+-      sprintf(buf,"%s\\%s\\%s\\%s\\\n",ip,data,agent,user);
++      snprintf(buf,sizeof(buf),"%s\\%s\\%s\\%s\\\n",ip,data,agent,user);
+       fputs(buf,fp_ou);
+       user[0]='\0';
+    }
+@@ -170,7 +170,7 @@ void useragent()
+    fputs(html,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(ip,buf,'\\');
++      getword(ip,buf,'\\',sizeof(ip));
+ 
+       if(strcmp(Ip2Name,"yes") == 0) {
+          if(strcmp(ip,ipbefore) != 0) {
+@@ -180,18 +180,18 @@ void useragent()
+          } else strcpy(ip,namebefore);
+       }
+ 
+-      getword(data,buf,'\\');
+-      getword(agent,buf,'\\');
+-      getword(user,buf,'\\');
++      getword(data,buf,'\\',sizeof(data));
++      getword(agent,buf,'\\',sizeof(agent));
++      getword(user,buf,'\\',sizeof(user));
+ 
+       if(strcmp(user,user_old) != 0) {
+-         sprintf(html,"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,user,TxBgColor,FontSize,agent);
++         snprintf(html,sizeof(html),"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,user,TxBgColor,FontSize,agent);
+          fputs(html,fp_ht);
+          strcpy(user_old,user);
+          strcpy(agent_old,agent);
+       } else {
+          if(strcmp(agent,agent_old) != 0) {
+-            sprintf(html,"<tr><td></td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,agent);
++            snprintf(html,sizeof(html),"<tr><td></td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,agent);
+             fputs(html,fp_ht);
+             strcpy(agent_old,agent);
+          }
+@@ -220,9 +220,9 @@ void useragent()
+    agent_old[0]='\0';
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(ip,buf,'\\');
+-      getword(data,buf,'\\');
+-      getword(agent,buf,'\\');
++      getword(ip,buf,'\\',sizeof(ip));
++      getword(data,buf,'\\',sizeof(data));
++      getword(agent,buf,'\\',sizeof(agent));
+ 
+       if(!cont) {
+          cont++;
+@@ -273,18 +273,18 @@ void useragent()
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+       buf[strlen(buf)-1]='\0';
+-      getword(tagent,buf,' ');
++      getword(tagent,buf,' ',sizeof(tagent));
+       perc=atoi(tagent) * 100;
+       perc=perc / agentot2;
+ 
+-      sprintf(html,"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=right bgcolor=%s><font size=%s>%d</td><td align=right bgcolor=%s><font size=%s>%3.2f</td></tr>\n",TxBgColor,FontSize,buf,TxBgColor,FontSize,atoi(tagent),TxBgColor,FontSize,perc);
++      snprintf(html,sizeof(html),"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=right bgcolor=%s><font size=%s>%d</td><td align=right bgcolor=%s><font size=%s>%3.2f</td></tr>\n",TxBgColor,FontSize,buf,TxBgColor,FontSize,atoi(tagent),TxBgColor,FontSize,perc);
+       fputs(html,fp_ht);
+    }
+ 
+    fputs("</table></html>\n",fp_ht);
+    if(strcmp(ShowSargInfo,"yes") == 0) {
+       zdate(ftime, DateFormat);
+-      sprintf(html,"<br><br><center><font size=-2>%s <a href='%s'>%s-%s</a> %s %s</font></center>\n",text[108],URL,PGM,VERSION,text[109],ftime);
++      snprintf(html,sizeof(html),"<br><br><center><font size=-2>%s <a href='%s'>%s-%s</a> %s %s</font></center>\n",text[108],URL,PGM,VERSION,text[109],ftime);
+       fputs(html,fp_ht);
+    }
+ 
+diff -pruN sarg-2.2.5.orig/util.c sarg-2.2.5/util.c
+--- sarg-2.2.5.orig/util.c	2008-03-13 11:48:50.168254525 -0600
++++ sarg-2.2.5/util.c	2008-03-13 12:40:36.473025490 -0600
+@@ -55,10 +55,9 @@ void css(FILE *fp_css);
+     }
+ }*/
+ 
+-void getword(char *word, char *line, int stop)
++void getword(char *word, char *line, int stop, int limit)
+ {
+   int x = 0, y = 0;
+-  int limit=strlen(line) + 1;
+   //char wline[MAXLEN];
+ 
+   //strcpy(wline,line);
+@@ -70,7 +69,7 @@ void getword(char *word, char *line, int
+ 
+   for(x=0; x<limit && line[x] && (line[x] != stop ); x++)
+     word[x] = line[x];
+-  if(x == limit) {
++  if(x > limit) {
+     printf("SARG: getword loop detected.\n");
+     //printf("SARG: Record=\"%s\"\n",wline);
+     printf("SARG: searching for \'x%x\'\n",stop);
+@@ -197,9 +196,9 @@ void my_mkdir(char *name)
+ 
+    strcpy(w0,name);
+    strcpy(w2,"/");
+-   getword(w1,w0,'/');
++   getword(w1,w0,'/',sizeof(w1));
+    while(strstr(w0,"/") != 0) {
+-      getword(w1,w0,'/');
++      getword(w1,w0,'/',sizeof(w1));
+       strcat(w2,w1);
+       if(access(w2, R_OK) != 0) {
+          if(mkdir(w2,0755)) {
+@@ -333,8 +332,8 @@ void name_month(char *month)
+    strcpy(m,text[133]);
+ 
+    for(x=0; x<z; x++)
+-      getword(w,m,',');
+-   getword(month,m,',');
++      getword(w,m,',',sizeof(w));
++   getword(month,m,',',sizeof(month));
+ }
+ 
+ 
+@@ -397,13 +396,13 @@ void fixip(char *ip)
+    }
+ 
+    if(iflag) {
+-      getword(n1,wip,'.');
+-      getword(n2,wip,'.');
+-      getword(n3,wip,'.');
++      getword(n1,wip,'.',sizeof(n1));
++      getword(n2,wip,'.',sizeof(n2));
++      getword(n3,wip,'.',sizeof(n3));
+    } else {
+-      getword(n1,wip,'_');
+-      getword(n2,wip,'_');
+-      getword(n3,wip,'_');
++      getword(n1,wip,'_',sizeof(n1));
++      getword(n2,wip,'_',sizeof(n2));
++      getword(n3,wip,'_',sizeof(n3));
+    }
+    ip[0]='\0';
+    sprintf(ip,"%s%s%s%s%s%s%s",n1,sep,n2,sep,n3,sep,wip);
+@@ -656,11 +655,11 @@ void obttotal(char *dirname, char *name,
+    }
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+-      getword(warea,buf,' ');
++      getword(warea,buf,' ',sizeof(warea));
+       if(strcmp(warea,"TOTAL") != 0)
+          continue;
+-      getword(warea,buf,' ');
+-      getword(warea,buf,' ');
++      getword(warea,buf,' ',sizeof(warea));
++      getword(warea,buf,' ',sizeof(warea));
+       twork=my_atoll(warea);
+       sprintf(tbytes,"%s",fixnum(twork,1));
+    }
+@@ -894,9 +893,9 @@ void strip_latin(char *line)
+    char warea[255];
+ 
+    while(strstr(line,"&") != 0){
+-      getword(warea,line,'&');
++      getword(warea,line,'&',sizeof(warea));
+       strncat(warea,line,1);
+-      getword(buf,line,';');
++      getword(buf,line,';',sizeof(buf));
+       strcat(warea,line);
+       strcpy(line,warea);
+    }
+@@ -978,11 +977,11 @@ void date_from(char *date, char *dfrom, 
+       strcpy(date,wdate);
+    }
+ 
+-   getword(diaf,wdate,'/');
+-   getword(mesf,wdate,'/');
+-   getword(anof,wdate,'-');
+-   getword(diau,wdate,'/');
+-   getword(mesu,wdate,'/');
++   getword(diaf,wdate,'/',sizeof(diaf));
++   getword(mesf,wdate,'/',sizeof(mesf));
++   getword(anof,wdate,'-',sizeof(anof));
++   getword(diau,wdate,'/',sizeof(diau));
++   getword(mesu,wdate,'/',sizeof(mesu));
+    strcpy(anou,wdate);
+ 
+    sprintf(dfrom,"%s%s%s",anof,mesf,diaf);
+@@ -1117,7 +1116,7 @@ int vercode(char *code)
+ 
+    strcpy(warea,excludecode);
+    for(z=0; z<=excode-1; z++) {
+-      getword(cod,warea,';');
++      getword(cod,warea,';',sizeof(cod));
+       if(strcmp(code,cod) == 0) 
+          return 1;
+    }
+@@ -1244,7 +1243,7 @@ char* get_size(char *path, char *file)
+    sprintf(cmd,"du -skh %s%s",path,file);
+    fp = popen(cmd, "r");
+    fgets(response, 255, fp);
+-   getword(val5,response,'\t');
++   getword(val5,response,'\t',sizeof(val5));
+    pclose(fp);
+ 
+    return (val5);

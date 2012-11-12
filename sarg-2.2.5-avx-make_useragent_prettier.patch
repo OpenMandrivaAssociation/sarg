@@ -1,0 +1,133 @@
+diff -pruN sarg-2.2.5.orig/useragent.c sarg-2.2.5/useragent.c
+--- sarg-2.2.5.orig/useragent.c	2008-03-13 13:33:06.657836687 -0600
++++ sarg-2.2.5/useragent.c	2008-03-13 15:31:44.894181729 -0600
+@@ -29,6 +29,7 @@ void getword(char *word, char *line, int
+ void show_sarg(FILE *fp_ou, char *ind);
+ void ip2name(char *ip);
+ void zdate(char *ftime, char *DateFormat);
++void css(FILE *fp_css);
+ 
+ void useragent()
+ {
+@@ -122,7 +123,7 @@ void useragent()
+       debuga(msg);
+    }
+ 
+-   sprintf(csort,"sort -n -t '\\' -k 4,4 -k 3,3 -k 2,2 -k 1,1 -o '%s' '%s'",tmp2,tmp3);
++   sprintf(csort,"sort -n -t ' ' -k 4,4 -k 3,3 -k 2,2 -k 1,1 -o '%s' '%s'",tmp2,tmp3);
+    system(csort);
+ 
+    unlink(tmp3);
+@@ -140,33 +141,48 @@ void useragent()
+    if(debug)
+       debuga(text[72]);
+ 
+-   fprintf(fp_ht, "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html>\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\">\n",CharSet);
++   fputs("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"",fp_ht);
++   fputs(" \"http://www.w3.org/TR/html4/loose.dtd\">\n",fp_ht);
++   fputs("<html>\n",fp_ht);
++   fputs("<head>\n",fp_ht);
++   snprintf(html,sizeof(html),"  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=%s\">\n",CharSet);
++   fputs(html,fp_ht);
++   css(fp_ht);
+    fputs("</head>\n",fp_ht);
+-   if(strlen(FontFace) > 0) fprintf(fp_ht,"<font face=%s>\n",FontFace);
+-   fprintf(fp_ht,"<body bgcolor=%s text=%s background='%s'>\n",BgColor,TxColor,BgImage);
+-   if(strlen(LogoImage) > 0) fprintf(fp_ht, "<center><table cellpadding=\"0\" cellspacing=\"0\">\n<tr><th class=\"logo\"><img src='%s' border=0 align=absmiddle width=%s height=%s>&nbsp;%s</th></tr>\n<tr><td height=\"5\"></td></tr>\n</table>\n",LogoImage,Width,Height,LogoText);
++
++   snprintf(buf,sizeof(buf),"<body style=\"font-family:%s;font-size:%s;background-color:%s; \
++       background-image:url(%s)\">\n",FontFace,TitleFontSize,BgColor,BgImage);
++   fputs(buf,fp_ht);
++
++   if(strlen(LogoImage) > 0) {
++      fputs("<center><table cellpadding=\"0\" cellspacing=\"0\">\n",fp_ht);
++      snprintf(html,sizeof(html),"<tr><th class=\"logo\"><img src='%s' border=0 align=absmiddle width=%s height=%s>&nbsp;%s</th></tr>\n",LogoImage,Width,Height,LogoText);
++      fputs(html,fp_ht);
++      fputs("<tr><td height=\"5\"></td></tr>\n",fp_ht);
++      fputs("</table>\n",fp_ht);
++   }
+ 
+    if(strcmp(IndexTree,"date") == 0)
+       show_sarg(fp_ht, "../../..");
+    else
+       show_sarg(fp_ht,"..");
+-   fputs("<center><table cellpadding=0 cellspacing=0>\n",fp_ht);
+-   sprintf(html,"<tr><th align=center colspan=2><b><font color=%s size=+1>%s</font></b></th></tr>\n",TiColor,text[105]);
++   fputs("<center><table cellpadding=\"2\" cellspacing=\"1\">\n",fp_ht);
++   snprintf(html,sizeof(html),"<tr><th class=\"title\" colspan=\"2\">%s</th></tr>\n",text[105]);
+    fputs(html,fp_ht);
+ 
+    fputs("<tr><td></td></tr><tr><td></td></tr>",fp_ht);
+    fputs("</table></center>\n",fp_ht);
+ 
+-   fputs("<center><table cellpadding=0 cellspacing=0>\n",fp_ht);
++   fputs("<center><table cellpadding=\"2\" cellspacing=\"1\">\n",fp_ht);
+ 
+-   sprintf(html,"<tr><td align=right bgcolor=%s><font size=%s>%s:</font><td align=left bgcolor=%s><font size=%s>%s - %s</font></td></td></tr>\n",HeaderBgColor,FontSize,text[89],TxBgColor,FontSize,idate,fdate);
++   snprintf(html,sizeof(html),"<tr><td class=\"data\"%s:</td><td class=\"data\">%s - %s</td></tr>\n",text[89],idate,fdate);
+    fputs(html,fp_ht);
+ 
+    fputs("</table></center>\n",fp_ht);
+-   fputs("<center><table cellpadding=0 cellspacing=0>\n",fp_ht);
++   fputs("<center><table cellpadding=\"2\" cellspacing=\"1\">\n",fp_ht);
+    fputs("<tr><td></td><td></td></tr>",fp_ht);
+ 
+-   sprintf(html,"<tr><th align=left bgcolor=%s><font size=%s color=%s>%s</font></th><th bgcolor=%s align=left><font size=%s color=%s>%s</font></th></tr>\n",HeaderBgColor,FontSize,HeaderColor,text[98],HeaderBgColor,FontSize,HeaderColor,text[106]);
++   snprintf(html,sizeof(html),"<tr><th class=\"header\">%s</th><th class=\"header\">%s</th></tr>\n",text[98],text[106]);
+    fputs(html,fp_ou);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+@@ -185,13 +201,13 @@ void useragent()
+       getword(user,buf,'\\',sizeof(user));
+ 
+       if(strcmp(user,user_old) != 0) {
+-         snprintf(html,sizeof(html),"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,user,TxBgColor,FontSize,agent);
++         snprintf(html,sizeof(html),"<tr><td class=\"data\">%s</td><td class=\"data2\">%s</td></tr>\n",user,agent);
+          fputs(html,fp_ht);
+          strcpy(user_old,user);
+          strcpy(agent_old,agent);
+       } else {
+          if(strcmp(agent,agent_old) != 0) {
+-            snprintf(html,sizeof(html),"<tr><td></td><td align=left bgcolor=%s><font size=%s>%s</td></tr>\n",TxBgColor,FontSize,agent);
++            snprintf(html,sizeof(html),"<tr><td class=\"data\"></td><td class=\"data2\">%s</td></tr>\n",agent);
+             fputs(html,fp_ht);
+             strcpy(agent_old,agent);
+          }
+@@ -233,7 +249,7 @@ void useragent()
+ 
+       if(strcmp(agent,agent_old) != 0) {
+          agentdif++;
+-         sprintf(html,"%06d %s\n",agentot,agent_old);
++         snprintf(html,sizeof(html),"%06d %s\n",agentot,agent_old);
+          fputs(html,fp_ou);
+          strcpy(agent_old,agent);
+          agentot2+=agentot;
+@@ -241,7 +257,7 @@ void useragent()
+       }
+    }
+    agentdif++;
+-   sprintf(html,"%06d %s\n",agentot,agent);
++   snprintf(html,sizeof(html),"%06d %s\n",agentot,agent);
+    fputs(html,fp_ou);
+    agentot2+=agentot;
+ 
+@@ -267,8 +283,8 @@ void useragent()
+ 
+    fputs("<br><br>\n",fp_ht);
+ 
+-   fputs("<center><table cellpadding=0 cellspacing=0>\n",fp_ht);
+-   sprintf(html,"<tr><th align=left bgcolor=%s><font size=%s color=%s>%s</font></th><th bgcolor=%s align=left><font size=%s color=%s>%s</font></th><th align=center bgcolor=%s><font size=%s color=%s>%%</font></th></tr>\n",HeaderBgColor,FontSize,HeaderColor,text[106],HeaderBgColor,FontSize,HeaderColor,text[107],HeaderBgColor,FontSize,HeaderColor);
++   fputs("<center><table cellpadding=\"2\" cellspacing=\"1\">\n",fp_ht);
++   snprintf(html,sizeof(html),"<tr><th class=\"header\">%s</th><th class=\"header\">%s</th><th class=\"header\">%%</th></tr>\n",text[106],text[107]);
+    fputs(html,fp_ht);
+ 
+    while(fgets(buf,sizeof(buf),fp_in)!=NULL) {
+@@ -277,7 +293,7 @@ void useragent()
+       perc=atoi(tagent) * 100;
+       perc=perc / agentot2;
+ 
+-      snprintf(html,sizeof(html),"<tr><td align=left bgcolor=%s><font size=%s>%s</td><td align=right bgcolor=%s><font size=%s>%d</td><td align=right bgcolor=%s><font size=%s>%3.2f</td></tr>\n",TxBgColor,FontSize,buf,TxBgColor,FontSize,atoi(tagent),TxBgColor,FontSize,perc);
++      snprintf(html,sizeof(html),"<tr><td class=\"data2\">%s</td><td class=\"data\">%d</td><td class=\"data\">%3.2f</td></tr>\n",buf,atoi(tagent),perc);
+       fputs(html,fp_ht);
+    }
+ 

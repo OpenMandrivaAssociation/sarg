@@ -1,0 +1,17 @@
+--- sarg-2.2.5/report.c.orig	2008-04-21 17:52:42.000000000 +0200
++++ sarg-2.2.5/report.c	2008-04-21 17:58:56.000000000 +0200
+@@ -34,11 +34,11 @@ void gerarel()
+    char accdia[11], acchora[9], accuser[MAXLEN], accip[MAXLEN], accurl[MAXLEN], accbytes[12], accelap[10];
+    char oldaccdia[11], oldacchora[9], oldaccip[MAXLEN], wdir[MAXLEN], per1[MAXLEN];
+    char wdirname[MAXLEN], oldurl[MAXLEN], oldaccuser[MAXLEN];
+-   char olduser[MAXLEN], oldmsg[50], acccode[50], oldaccelap[10], oldacccode[50], user[MAXLEN];
++   char olduser[MAXLEN], oldmsg[50], acccode[MAXLEN/2 - 1], oldaccelap[10], oldacccode[MAXLEN/2 - 1], user[MAXLEN];
+    char ipantes[MAXLEN], nameantes[MAXLEN], wdname[MAXLEN], wname2[MAXLEN]; 
+    char accsmart[MAXLEN];
+-   char wcrc[50];
+-   char crc2[50];
++   char wcrc[MAXLEN/2 -1];
++   char crc2[MAXLEN/2 -1];
+    long long int nbytes=0; 
+    long long int nelap=0; 
+    long long int nacc=0;

@@ -1,0 +1,12 @@
+diff -pruN sarg-2.2.5.orig/include/conf.h sarg-2.2.5/include/conf.h
+--- sarg-2.2.5.orig/include/conf.h	2008-03-13 11:48:50.048252715 -0600
++++ sarg-2.2.5/include/conf.h	2008-03-13 11:49:31.608879647 -0600
+@@ -214,7 +214,7 @@ char ShowSargLogo[5];
+ char ParsedOutputLog[MAXLEN];
+ char ParsedOutputLogCompress[255];
+ char DisplayedValues[20];
+-char HeaderFontSize[4];
++char HeaderFontSize[5];
+ char TitleFontSize[5];
+ char wwwDocumentRoot[MAXLEN];
+ char ExternalCSSFile[MAXLEN];
