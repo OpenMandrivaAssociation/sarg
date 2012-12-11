@@ -1,6 +1,2 @@
 sources:
-  "0sarg.daily:"	6ee3c7a225303279342df8a381e88d734a3ebe0c
-  "0sarg.monthly:"	6c7e5fae3d3b2eeb3bff467482e2fdc8805705df
-  "0sarg.weekly:"	ec913aef0588ada039bab6be390d3a2d857fd12a
-  "sarg-2.3.2.tar.gz:"	5d0e2c9efbffb163b030a46e51491dca6ab6aa0c
-  "sarg.conf.mandriva:"	f8b414a50dcd2a3c7f3071d5d223f5d4f354bbd0
+  "sarg-2.3.2.tar.gz": 5d0e2c9efbffb163b030a46e51491dca6ab6aa0c

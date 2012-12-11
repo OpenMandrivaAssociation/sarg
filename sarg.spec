@@ -12,14 +12,6 @@ Source1:	0sarg.daily
 Source2:	0sarg.weekly
 Source3:	0sarg.monthly
 Source4:	sarg.conf.mandriva
-Patch1:		sarg-2.2.3.1-lots-of-compiler-warnings.patch
-Patch2:		sarg-2.2.3.1-rewind.patch
-Patch3:		sarg-2.2.5-avx-fix_segfault.patch
-Patch4:		sarg-2.2.5-avx-make-getword-better.patch
-Patch5:		sarg-2.2.5-avx-make_useragent_prettier.patch
-Patch6:		sarg-2.2.5-avx-too_small_font_buffer.patch
-Patch7:		sarg-2.2.5-enlarge_report_buffers.patch
-Patch8:		sarg-2.2.5-limit_sprintf.patch
 Requires:	squid
 Requires:	bash
 
@@ -28,29 +20,18 @@ Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
 The reports will be generated in HTML or email.
 
 %prep
-
 %setup -q
-#%patch1 -p1
-#%patch2 -p1
-#%patch3 -p1
-#%patch4 -p1
-#%patch5 -p1
-#%patch6 -p1
-#%patch7 -p1
-#%patch8 -p0
 
 %build
 chmod a+x cfgaux configure include
 chmod 744 images
 %configure2_5x
 
-
 mkdir -p %{buildroot}/%{_mandir}/man1
 perl -p -i -e 's|/usr/share/man/man1|%{buildroot}/usr/share/man/man1|' %{buildroot}/%name-%version/Makefile
 make
 
 %install
-
 mkdir -p %{buildroot}/{%_bindir,%_datadir/%name,%_sysconfdir/%name}
 mkdir -p %{buildroot}%{contentdir}/html/squid
 mkdir -p %{buildroot}%{contentdir}/html/squid/{daily,weekly,monthly}
@@ -67,9 +48,9 @@ mv %{buildroot}/%{_sysconfdir}/%{name}.conf %{buildroot}/%{_sysconfdir}/%{name}/
 mv %{buildroot}/%{_sysconfdir}/user_limit_block %{buildroot}/%{_sysconfdir}/%{name}/user_limit_block
 mv %{buildroot}/%{_sysconfdir}/css.tpl %{buildroot}/%{_sysconfdir}/%{name}/css.tpl
 
-%find_lang %name
+%find_lang %{name}
 
-%files -f %name.lang
+%files -f %{name}.lang
 %defattr(-,root,squid)
 %doc CONTRIBUTORS DONATIONS ChangeLog
 %{_mandir}/man1/*
@@ -84,6 +65,6 @@ mv %{buildroot}/%{_sysconfdir}/css.tpl %{buildroot}/%{_sysconfdir}/%{name}/css.t
 %attr(0755,root,squid) %dir %{contentdir}/html/squid/monthly
 %attr(0755,root,squid) %dir %{contentdir}/html/%{name}-php
 %{_datadir}/%{name}
-%{contentdir}/html/%{name}-php/
 %config(noreplace) %attr(0754,root,squid) %{_sysconfdir}/cron.*/*
 %config(noreplace) %attr(0644,root,squid) %{_sysconfdir}/%{name}/exclude_codes
+

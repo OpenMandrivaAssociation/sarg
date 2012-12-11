@@ -1,0 +1,18 @@
+#!/bin/bash
+
+#Get current date
+TODAY=$(date +%d/%m/%Y) 
+
+#Get one day ago today
+YESTERDAY=$(date --date "1 day ago" +%d/%m/%Y) 
+
+mkdir -p /var/www/html/squid/daily
+chown -R  apache.apache /var/www/html/squid/daily
+
+NAAT="/var/www-naat/html/genfiles/modules/squid-reports/daily"
+if [ -d ${NAAT} ]; then
+    chown -R apache ${NAAT}
+fi
+
+export LC_ALL=C
+/usr/sbin/sarg -f /etc/sarg/sarg.conf -l /var/log/squid/access.log -o /var/www/html/squid/daily -z -d $YESTERDAY-$TODAY > /dev/null 2>&1

@@ -1,0 +1,36 @@
+#!/bin/bash
+
+#dynamic counter
+cnt=1
+
+if [ $cnt -eq 4 ]; then
+#Get yesterday date
+YESTERDAY=$(date --date "1 day ago" +%d/%m/%Y)
+ 
+#Get 4 weeks ago date
+WEEKSAGO=$(date --date "4 weeks ago" +%d/%m/%Y)
+
+mkdir -p /var/www/html/squid/monthly 
+chown -R apache /var/www/html/squid/monthly 
+
+NAAT="/var/www-naat/html/genfiles/modules/squid-reports/monthly "
+if [ -d ${NAAT} ]; then
+    chown -R apache ${NAAT}
+fi
+
+export LC_ALL=C
+/usr/sbin/sarg -f /etc/sarg/sarg.conf -l /var/log/squid/access.log -o /var/www/html/squid/monthly -d $WEEKSAGO-$YESTERDAY > /dev/null 2>&1
+ 
+/usr/sbin/squid -k rotate
+
+#don't move next line to upper, reason is that sed change the cnt assignment of the first 7 lines
+cnt=1 
+else
+let cnt++
+fi
+#echo Will rename itself \($0\) with cnt \($cnt\) increased. 1>&2
+sargtmp=/var/tmp/`basename $0`
+sed "1,7s/^cnt=.*/cnt=$cnt/
+" $0 >|$sargtmp
+chmod -f 775 $sargtmp
+mv -f $sargtmp $0
