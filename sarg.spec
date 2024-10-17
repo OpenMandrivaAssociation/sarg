@@ -6,7 +6,7 @@ Version:	2.3.2
 Release:	2
 License:	GPLv2+
 Group:		Monitoring
-URL:		http://sarg.sourceforge.net/
+URL:		https://sarg.sourceforge.net/
 Source:		http://prdownloads.sourceforge.net/sarg/%{name}-%{version}.tar.gz
 Source1:	0sarg.daily
 Source2:	0sarg.weekly
