@@ -15,6 +15,11 @@ Source4:	sarg.conf.mandriva
 Requires:	squid
 Requires:	bash
 
+BuildRequires:	autoconf
+BuildRequires:	automake
+BuildRequires:	libtool-base
+BuildRequires:	slibtool
+BuildRequires:	make
 %description
 Sarg (was Sqmgrlog) generate reports per user/ip/name from SQUID log file.
 The reports will be generated in HTML or email.
